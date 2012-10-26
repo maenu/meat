@@ -8,17 +8,23 @@ start
 	= statements
 
 statements
-	= ([\n\r]* statement:statement [\n\r]*
+	= statements:([\r\n]* statement:statement [\r\n]*
 		{
 			return statement;
 		})*
+		{
+			return new maenulabs.meat.ast.StatementsNode(statements);
+		}
 
 statement
+	= messageSend
+	/ comment
+
+messageSend
 	= expression:expression message:message
 		{
-			return [expression, message];
+			return new maenulabs.meat.ast.MessageSendNode(expression, message);
 		}
-	/ comment
 
 expression
 	= literal
@@ -29,24 +35,31 @@ expression
 
 literal
 	= block
+	/ character
 	/ string
 	/ number
 	/ list
 	/ variable
 
 block
-	= "{" [\n\r] statements:([\t] statement:statement
+	= "{" [\r\n] statements:([\t] statement:statement
 		{
 			return statement;
-		})+ [\n\r] "}"
+		})+ [\r\n] "}"
 		{
-			return statements;
+			return new maenulabs.meat.ast.BlockNode(statements);
+		}
+
+character
+	= "$" character:.
+		{
+			return new maenulabs.meat.ast.CharacterNode(character);
 		}
 
 string
 	= "'" string:[^']* "'"
 		{
-			return string.join("");
+			return new maenulabs.meat.ast.StringNode(string.join(""));
 		}
 
 number
@@ -55,7 +68,7 @@ number
 			return "." + fraction.join("");
 		})?
 		{
-			return integer.join("") + fraction;
+			return new maenulabs.meat.ast.NumberNode(parseFloat(integer.join("") + fraction));
 		}
 
 list
@@ -64,42 +77,42 @@ list
 			return expression;
 		})* " ]"
 		{
-			return expressions;
+			return new maenulabs.meat.ast.ListNode(expressions);
 		}
 
 variable
 	= variable:[a-zA-Z]+
 		{
-			return variable.join("");
+			return new maenulabs.meat.ast.VariableNode(variable.join(""));
 		}
 
 comment
 	= "\"" comment:[^"]* "\""
 		{
-			return comment.join("");
+			return new maenulabs.meat.ast.CommentNode(comment.join(""));
 		}
 
 message
-	= pairs:(" " selector:keyword " " argument:expression
+	= pairs:(" " selector:keyword " " expression:expression
 		{
-			return [selector, argument];
+			return [selector, expression];
 		})+
 		{
 			var selectors = [];
-			var arguments = [];
+			var expressions = [];
 			for(var i = 0; i < pairs.length; i++) {
 				selectors.push(pairs[i][0]);
-				arguments.push(pairs[i][1]);
+				expressions.push(pairs[i][1]);
 			}
-			return [selectors.join(""), arguments];
+			return new maenulabs.meat.ast.KeywordMessageNode(selectors.join(""), expressions);
 		}
-	/ " " selector:binary " " argument:expression
+	/ " " selector:binary " " expression:expression
 		{
-			return [selector, argument];
+			return new maenulabs.meat.ast.BinaryMessageNode(selector, expression);
 		}
 	/ " " selector:unary
 		{
-			return selector;
+			return new maenulabs.meat.ast.UnaryMessageNode(selector);
 		}
 
 unary

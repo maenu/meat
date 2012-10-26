@@ -26,3 +26,4 @@ a add: 'sweet'
 a add: 1.2
 a add: 1
 a add: [ 1 2 3 ]
+a add: $a

@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+
+	<head>
+		<title>Meat</title>
+		
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		
+		<script type="text/javascript" src="peg-0.7.0.min.js"></script>
+		<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="Class.js"></script>
+		<script type="text/javascript" src="Ast.js"></script>
+		<script type="text/javascript" src="Compiler.js"></script>
+		
+		<script type="text/javascript">
+			$(document).ready(function() {
+				var grammar = $.ajax("meat.pegjs", {
+					async: false
+				}).responseText;
+				var example = $.ajax("example.meat", {
+					async: false
+				}).responseText;
+				var parser = PEG.buildParser(grammar);
+				var ast = parser.parse(example);
+				var compiler = new maenulabs.meat.compiler.Compiler();
+				var compiled = compiler.compile(ast);
+				console.log(ast);
+				console.log(compiled);
+			});
+		</script>
+		
+	</head>
+	
+	<body>
+	
+	</body>
+	
+</html>
