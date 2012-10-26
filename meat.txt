@@ -1,0 +1,7 @@
+identifiers are objects too!
+ - smart pointers, suicide objects
+ - assignment as message
+comment are object too!
+ - because it can be
+
+everything in the source code is an object
