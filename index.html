@@ -6,15 +6,15 @@
 		
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		
-		<script type="text/javascript" src="peg-0.7.0.min.js"></script>
-		<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
-		<script type="text/javascript" src="Class.js"></script>
-		<script type="text/javascript" src="Ast.js"></script>
-		<script type="text/javascript" src="Compiler.js"></script>
+		<script type="text/javascript" src="lib/js/peg-0.7.0.min.js"></script>
+		<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="src/main/js/Class.js"></script>
+		<script type="text/javascript" src="src/main/js/maenulabs/meat/ast.js"></script>
+		<script type="text/javascript" src="src/main/js/maenulabs/meat/compiler.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
-				var grammar = $.ajax("meat.pegjs", {
+				var grammar = $.ajax("src/main/js/meat.pegjs", {
 					async: false
 				}).responseText;
 				var example = $.ajax("example.meat", {
@@ -24,7 +24,6 @@
 				var ast = parser.parse(example);
 				var compiler = new maenulabs.meat.compiler.Compiler();
 				var compiled = compiler.compile(ast);
-				console.log(ast);
 				console.log(compiled);
 			});
 		</script>
