@@ -4,21 +4,24 @@
  * @author Manuel Leuenberger
  */
 
-start
-	= statements
-
 statements
-	= statements:([\r\n]* statement:statement [\r\n]*
+	= statements:([\n\t]* statement:statement [\n\t]*
 		{
 			return statement;
-		})*
+		})+
 		{
 			return new maenulabs.meat.ast.StatementsNode(statements);
 		}
 
 statement
-	= messageSend
-	/ comment
+	= comment
+	/ messageSend
+
+comment
+	= '"' comment:[^"]* '"'
+		{
+			return new maenulabs.meat.ast.CommentNode(comment.join(''));
+		}
 
 messageSend
 	= expression:expression message:message
@@ -28,89 +31,102 @@ messageSend
 
 expression
 	= literal
-	/ "(" statement:statement ")"
+	/ comment
+	/ '(' messageSend:messageSend ')'
 		{
-			return statement;
+			return messageSend;
 		}
 
 literal
-	= block
+	= variable
+	/ object
+	/ block
 	/ character
 	/ string
 	/ number
 	/ list
-	/ variable
+
+variable
+	= identifier:[a-zA-Z]+
+		{
+			return new maenulabs.meat.ast.VariableNode(identifier.join(''));
+		}
+
+object
+	= '.'
+		{
+			return new maenulabs.meat.ast.ObjectNode();
+		}
 
 block
-	= "{" [\r\n] statements:([\t] statement:statement
-		{
-			return statement;
-		})+ [\r\n] "}"
+	= '{' statements:statements '}'
 		{
 			return new maenulabs.meat.ast.BlockNode(statements);
 		}
 
 character
-	= "$" character:.
+	= '$' character:.
 		{
 			return new maenulabs.meat.ast.CharacterNode(character);
 		}
 
 string
-	= "'" string:[^']* "'"
+	= '\'' string:[^']* '\''
 		{
-			return new maenulabs.meat.ast.StringNode(string.join(""));
+			return new maenulabs.meat.ast.StringNode(string.join(''));
 		}
 
 number
-	= integer:[0-9]+ fraction:("." fraction:[0-9]+
+	= signum:'-'? integer:[0-9]+ fraction:('.' fraction:[0-9]+
 		{
-			return "." + fraction.join("");
+			return '.' + fraction.join('');
 		})?
 		{
-			return new maenulabs.meat.ast.NumberNode(parseFloat(integer.join("") + fraction));
+			if (signum != '-') {
+				signum = '+';
+			}
+			return new maenulabs.meat.ast.NumberNode(parseFloat(signum + integer.join('') + fraction));
 		}
 
 list
-	= "[" expressions:(" " expression:expression
+	= '[]'
 		{
-			return expression;
-		})* " ]"
+			return new maenulabs.meat.ast.ListNode([]);
+		}
+	/ '[' expressions:(firstExpression:expression nextExpressions:(' ' nextExpression:expression
+		{
+			return nextExpression;
+		})*
+		{
+			var expressions = [firstExpression];
+			for(var i = 0; i < nextExpressions.length; i++) {
+				expressions.push(nextExpressions[i]);
+			}
+			return expressions;
+		}) ']'
 		{
 			return new maenulabs.meat.ast.ListNode(expressions);
 		}
 
-variable
-	= variable:[a-zA-Z]+
-		{
-			return new maenulabs.meat.ast.VariableNode(variable.join(""));
-		}
-
-comment
-	= "\"" comment:[^"]* "\""
-		{
-			return new maenulabs.meat.ast.CommentNode(comment.join(""));
-		}
-
 message
-	= pairs:(" " selector:keyword " " expression:expression
+	= pairs:(' ' selector:keyword ' ' argument:expression
 		{
-			return [selector, expression];
+			return [selector, argument];
 		})+
 		{
-			var selectors = [];
-			var expressions = [];
+			var selector = [];
+			var arguments = [];
 			for(var i = 0; i < pairs.length; i++) {
-				selectors.push(pairs[i][0]);
-				expressions.push(pairs[i][1]);
+				selector.push(pairs[i][0]);
+				arguments.push(pairs[i][1]);
 			}
-			return new maenulabs.meat.ast.KeywordMessageNode(selectors.join(""), expressions);
+			return new maenulabs.meat.ast.KeywordMessageNode(selector.join(''), arguments);
 		}
-	/ " " selector:binary " " expression:expression
+	/ ' ' selector:binary ' ' argument:expression
 		{
-			return new maenulabs.meat.ast.BinaryMessageNode(selector, expression);
+			return new maenulabs.meat.ast.BinaryMessageNode(selector, argument);
 		}
-	/ " " selector:unary
+	/ ' ' selector:unary
 		{
 			return new maenulabs.meat.ast.UnaryMessageNode(selector);
 		}
@@ -118,17 +134,17 @@ message
 unary
 	= selector:[a-zA-Z]+
 		{
-			return selector.join("");
+			return selector.join('');
 		}
 
 binary
 	= selector:[+\-*/=<>:]+
 		{
-	        return selector.join("");
+	        return selector.join('');
 		}
 
 keyword
-	= selector:[a-zA-Z]+ ":"
+	= selector:[a-zA-Z]+ ':'
 		{
-			return selector.join("") + ":";
+			return selector.join('') + ':';
 		}

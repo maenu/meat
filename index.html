@@ -9,6 +9,7 @@
 		<script type="text/javascript" src="lib/js/peg-0.7.0.min.js"></script>
 		<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
 		<script type="text/javascript" src="src/main/js/Class.js"></script>
+		<script type="text/javascript" src="src/main/js/maenulabs/meat/model.js"></script>
 		<script type="text/javascript" src="src/main/js/maenulabs/meat/ast.js"></script>
 		<script type="text/javascript" src="src/main/js/maenulabs/meat/compiler.js"></script>
 		
@@ -17,7 +18,7 @@
 				var grammar = $.ajax("src/main/js/meat.pegjs", {
 					async: false
 				}).responseText;
-				var example = $.ajax("example.meat", {
+				var example = $.ajax("src/main/meat/example.meat", {
 					async: false
 				}).responseText;
 				var parser = PEG.buildParser(grammar);

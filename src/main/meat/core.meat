@@ -1,0 +1,55 @@
+context oracle: {
+	context at: 'oracleContext' put: (Context new)
+	(context at: 'oracleContext') at: 'oldOracle' put: (context oracle)
+	{
+		"available in oracle context: selector arguments sender receiver"
+		((context at: 'selector') = 'send:with:in:to:') ifTrue: {
+			(((context at: 'arguments') at: 1) = ':=') ifTrue: {
+				((context at: 'arguments') at: 4) value: (((context at: 'arguments') at: 2) at: 1)
+			} ifFalse: {
+				((context at: 'arguments') at: 4) receive: ((context at: 'arguments') at: 1) with: ((context at: 'arguments') at: 2) in: ((context at: 'arguments') at: 3)
+			}
+		} ifFalse {
+			(context at: 'oldOracle') runIn: context
+		}
+	} in: (context at: 'oracleContext')
+} run
+
+"
+unresolved message sends:
+	=
+	ifTrue:ifFalse:
+	Context>>new
+	self
+"
+
+context at: 'Variable' put: .
+Variable oracle: {
+	(selector = 'name:value:') ifTrue: {
+		context at: 'variable' put: .
+		context at: 'variableContext' put: (Context new)
+		(context at: 'variableContext') at: 'name' put: (arguments at: 1)
+		(context at: 'variableContext') at: 'value' put: (arguments at: 2)
+		(context at: 'variable') oracle: ({
+			(selector = 'name:') ifTrue: {
+				context at: 'name' put: (arguments at: 1)
+				receiver self
+			} ifFalse: {
+				(selector = 'name') ifTrue: {
+					context at: 'name'
+				} ifFalse: {
+					(selector = 'value:') ifTrue: {
+						context at: 'value' put: (arguments at: 1)
+						receiver self
+					} ifFalse: {
+						(selector = 'value') ifTrue: {
+							context at: 'value'
+						} ifFalse: {
+							"should raise error"
+						}
+					}
+				}
+			}
+		} in: variableContext)
+	}
+}

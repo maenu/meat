@@ -4,4 +4,11 @@ identifiers are objects too!
 comment are object too!
  - because it can be
 
-everything in the source code is an object
+Everything in the source code is an object, and this really means everything:
+variables are objects, numbers, strings etc. Each object is an oracle that gets
+delegated the message sends and can respond to them.
+
+compilation process:
+ - parse -> AST
+ - translate -> meat code in minimal subset of language
+ - compile -> target code

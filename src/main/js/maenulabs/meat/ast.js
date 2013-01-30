@@ -11,18 +11,18 @@ maenulabs.meat.ast = maenulabs.meat.ast || {};
 maenulabs.meat.ast.Node = new Class(
 	Object,
 	function() {
-		
+		Object.apply(this, []);
 	},
 	{
 		accept: function(visitor) {
-			throw new Error("Abstract method not implemented");
+			throw new Error('abstract method');
 		}
 	});
 
 maenulabs.meat.ast.StatementsNode = new Class(
 	maenulabs.meat.ast.Node,
 	function(statements) {
-		maenulabs.meat.ast.Node.apply(this, arguments);
+		maenulabs.meat.ast.Node.apply(this, []);
 		this.statements = statements;
 	},
 	{
@@ -34,7 +34,7 @@ maenulabs.meat.ast.StatementsNode = new Class(
 maenulabs.meat.ast.StatementNode = new Class(
 	maenulabs.meat.ast.Node,
 	function() {
-		maenulabs.meat.ast.Node.apply(this, arguments);
+		maenulabs.meat.ast.Node.apply(this, []);
 	},
 	{
 		
@@ -43,7 +43,7 @@ maenulabs.meat.ast.StatementNode = new Class(
 maenulabs.meat.ast.MessageSendNode = new Class(
 	maenulabs.meat.ast.StatementNode,
 	function(expression, message) {
-		maenulabs.meat.ast.StatementNode.apply(this, arguments);
+		maenulabs.meat.ast.StatementNode.apply(this, []);
 		this.expression = expression;
 		this.message = message;
 	},
@@ -56,7 +56,7 @@ maenulabs.meat.ast.MessageSendNode = new Class(
 maenulabs.meat.ast.CommentNode = new Class(
 	maenulabs.meat.ast.StatementNode,
 	function(comment) {
-		maenulabs.meat.ast.StatementNode.apply(this, arguments);
+		maenulabs.meat.ast.StatementNode.apply(this, []);
 		this.comment = comment;
 	},
 	{
@@ -68,16 +68,39 @@ maenulabs.meat.ast.CommentNode = new Class(
 maenulabs.meat.ast.LiteralNode = new Class(
 	maenulabs.meat.ast.Node,
 	function() {
-		maenulabs.meat.ast.Node.apply(this, arguments);
+		maenulabs.meat.ast.Node.apply(this, []);
 	},
 	{
 		
 	});
 
+maenulabs.meat.ast.VariableNode = new Class(
+	maenulabs.meat.ast.LiteralNode,
+	function(identifier) {
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
+		this.identifier = identifier;
+	},
+	{
+		accept: function(visitor) {
+			visitor.visitVariableNode(this);
+		}
+	});
+
+maenulabs.meat.ast.ObjectNode = new Class(
+	maenulabs.meat.ast.LiteralNode,
+	function() {
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
+	},
+	{
+		accept: function(visitor) {
+			visitor.visitObjectNode(this);
+		}
+	});
+
 maenulabs.meat.ast.BlockNode = new Class(
 	maenulabs.meat.ast.LiteralNode,
 	function(statements) {
-		maenulabs.meat.ast.LiteralNode.apply(this, arguments);
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
 		this.statements = statements;
 	},
 	{
@@ -89,7 +112,7 @@ maenulabs.meat.ast.BlockNode = new Class(
 maenulabs.meat.ast.CharacterNode = new Class(
 	maenulabs.meat.ast.LiteralNode,
 	function(character) {
-		maenulabs.meat.ast.LiteralNode.apply(this, arguments);
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
 		this.character = character;
 	},
 	{
@@ -101,7 +124,7 @@ maenulabs.meat.ast.CharacterNode = new Class(
 maenulabs.meat.ast.StringNode = new Class(
 	maenulabs.meat.ast.LiteralNode,
 	function(string) {
-		maenulabs.meat.ast.LiteralNode.apply(this, arguments);
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
 		this.string = string;
 	},
 	{
@@ -113,7 +136,7 @@ maenulabs.meat.ast.StringNode = new Class(
 maenulabs.meat.ast.NumberNode = new Class(
 	maenulabs.meat.ast.LiteralNode,
 	function(number) {
-		maenulabs.meat.ast.LiteralNode.apply(this, arguments);
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
 		this.number = number;
 	},
 	{
@@ -124,9 +147,9 @@ maenulabs.meat.ast.NumberNode = new Class(
 
 maenulabs.meat.ast.ListNode = new Class(
 	maenulabs.meat.ast.LiteralNode,
-	function(expressions) {
-		maenulabs.meat.ast.LiteralNode.apply(this, arguments);
-		this.expressions = expressions;
+	function(elements) {
+		maenulabs.meat.ast.LiteralNode.apply(this, []);
+		this.elements = elements;
 	},
 	{
 		accept: function(visitor) {
@@ -134,32 +157,22 @@ maenulabs.meat.ast.ListNode = new Class(
 		}
 	});
 
-maenulabs.meat.ast.VariableNode = new Class(
-	maenulabs.meat.ast.LiteralNode,
-	function(variable) {
-		maenulabs.meat.ast.LiteralNode.apply(this, arguments);
-		this.variable = variable;
+maenulabs.meat.ast.MessageNode = new Class(
+	maenulabs.meat.ast.Node,
+	function(selector) {
+		maenulabs.meat.ast.Node.apply(this, []);
+		this.selector = selector;
 	},
 	{
 		accept: function(visitor) {
-			visitor.visitVariableNode(this);
+			visitor.visitMessageNode(this);
 		}
-	});
-
-maenulabs.meat.ast.MessageNode = new Class(
-	maenulabs.meat.ast.Node,
-	function() {
-		maenulabs.meat.ast.Node.apply(this, arguments);
-	},
-	{
-		
 	});
 
 maenulabs.meat.ast.UnaryMessageNode = new Class(
 	maenulabs.meat.ast.MessageNode,
 	function(selector) {
-		maenulabs.meat.ast.MessageNode.apply(this, arguments);
-		this.selector = selector;
+		maenulabs.meat.ast.MessageNode.apply(this, [selector]);
 	},
 	{
 		accept: function(visitor) {
@@ -169,10 +182,9 @@ maenulabs.meat.ast.UnaryMessageNode = new Class(
 
 maenulabs.meat.ast.BinaryMessageNode = new Class(
 	maenulabs.meat.ast.MessageNode,
-	function(selector, expression) {
-		maenulabs.meat.ast.MessageNode.apply(this, arguments);
-		this.selector = selector;
-		this.expression = expression;
+	function(selector, argument) {
+		maenulabs.meat.ast.MessageNode.apply(this, [selector, argument]);
+		this.argument = argument;
 	},
 	{
 		accept: function(visitor) {
@@ -182,10 +194,9 @@ maenulabs.meat.ast.BinaryMessageNode = new Class(
 
 maenulabs.meat.ast.KeywordMessageNode = new Class(
 	maenulabs.meat.ast.MessageNode,
-	function(selector, expressions) {
-		maenulabs.meat.ast.MessageNode.apply(this, arguments);
-		this.selector = selector;
-		this.expressions = expressions
+	function(selector, arguments) {
+		maenulabs.meat.ast.MessageNode.apply(this, [selector, arguments]);
+		this.arguments = arguments
 	},
 	{
 		accept: function(visitor) {

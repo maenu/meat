@@ -1,0 +1,41 @@
+
+"single line comment"
+
+"multi
+line
+comment"
+
+a := .
+
+a unary
+a > 1
+1 > a
+a > b
+(a > b) unary
+a keyword: 1
+a keyword: "comment argument"
+a keyword: 1 plus: 2
+a keyword: (b plus: 2)
+
+a execute: {
+	a + 1
+}
+
+a := {
+	a + 1
+}
+
+a := {
+	b := {
+		a + 1
+	}
+}
+
+a add: 'sweet'
+a add: 1.2
+a add: -1.2
+a add: 1
+a add: -1
+a add: []
+a add: [1 2 3]
+a add: $a
