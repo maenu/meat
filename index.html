@@ -1,10 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 
 	<head>
+		<meta charset="utf-8" />
+		
 		<title>Meat</title>
 		
-		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<style>
+			html, body, #compiled {
+				width: 100%;
+				height: 100%;
+			}
+		</style>
 		
 		<script type="text/javascript" src="lib/js/peg-0.7.0.min.js"></script>
 		<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
@@ -15,24 +22,25 @@
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
-				var grammar = $.ajax("src/main/js/meat.pegjs", {
+				var grammar = $.ajax('src/main/js/meat.pegjs', {
 					async: false
 				}).responseText;
-				var example = $.ajax("src/main/meat/example.meat", {
+				var example = $.ajax('src/main/meat/example.meat', {
 					async: false
 				}).responseText;
 				var parser = PEG.buildParser(grammar);
 				var ast = parser.parse(example);
 				var compiler = new maenulabs.meat.compiler.Compiler();
 				var compiled = compiler.compile(ast);
-				console.log(compiled);
+				console.log(ast);
+				$('#compiled').text(compiled);
 			});
 		</script>
 		
 	</head>
 	
 	<body>
-	
+		<textarea id="compiled"></textarea>
 	</body>
 	
 </html>

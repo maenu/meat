@@ -4,9 +4,16 @@
  * @author Manuel Leuenberger
  */
 
+{
+	var expectedIndent = 0;
+}
+
 statements
-	= statements:([\n\t]* statement:statement [\n\t]*
+	= statements:(indent:'\t'* statement:statement '\n'
 		{
+			if (indent.length != expectedIndent) {
+				throw new Error('bad indent');
+			}
 			return statement;
 		})+
 		{
@@ -18,9 +25,21 @@ statement
 	/ messageSend
 
 comment
-	= '"' comment:[^"]* '"'
+	= '"\n' indent commentLines:commentLine+ dedent indent:'\t'* '"'
 		{
-			return new maenulabs.meat.ast.CommentNode(comment.join(''));
+			if (indent.length != expectedIndent) {
+				throw new Error('bad indent');
+			}
+			return new maenulabs.meat.ast.CommentNode(commentLines);
+		}
+
+commentLine
+	= indent:'\t'* characters:[^"\n]* '\n'
+		{
+			if (indent.length != expectedIndent) {
+				throw new Error('bad indent');
+			}
+			return characters.join('');
 		}
 
 messageSend
@@ -59,10 +78,23 @@ object
 		}
 
 block
-	= '{' statements:statements '}'
+	= '{\n' indent statements:statements dedent indent:'\t'* '}'
 		{
+			if (indent.length != expectedIndent) {
+				throw new Error('bad indent');
+			}
 			return new maenulabs.meat.ast.BlockNode(statements);
 		}
+
+indent
+	= {
+		expectedIndent = expectedIndent + 1;
+	}
+
+dedent
+	= {
+		expectedIndent = expectedIndent - 1;
+	}
 
 character
 	= '$' character:.
@@ -99,7 +131,7 @@ list
 		})*
 		{
 			var expressions = [firstExpression];
-			for(var i = 0; i < nextExpressions.length; i++) {
+			for (var i = 0; i < nextExpressions.length; i++) {
 				expressions.push(nextExpressions[i]);
 			}
 			return expressions;
@@ -116,7 +148,7 @@ message
 		{
 			var selector = [];
 			var arguments = [];
-			for(var i = 0; i < pairs.length; i++) {
+			for (var i = 0; i < pairs.length; i++) {
 				selector.push(pairs[i][0]);
 				arguments.push(pairs[i][1]);
 			}
