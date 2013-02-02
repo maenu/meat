@@ -16,21 +16,21 @@
 		<script type="text/javascript" src="lib/js/peg-0.7.0.min.js"></script>
 		<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
 		<script type="text/javascript" src="src/main/js/Class.js"></script>
-		<script type="text/javascript" src="src/main/js/maenulabs/meat/model.js"></script>
-		<script type="text/javascript" src="src/main/js/maenulabs/meat/ast.js"></script>
-		<script type="text/javascript" src="src/main/js/maenulabs/meat/compiler.js"></script>
+		<script type="text/javascript" src="src/main/js/meat/model.js"></script>
+		<script type="text/javascript" src="src/main/js/meat/ast.js"></script>
+		<script type="text/javascript" src="src/main/js/meat/compiler.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				var grammar = $.ajax('src/main/js/meat.pegjs', {
 					async: false
 				}).responseText;
-				var example = $.ajax('src/main/meat/example.meat', {
+				var example = $.ajax('src/main/meat/Boolean.meat', {
 					async: false
 				}).responseText;
 				var parser = PEG.buildParser(grammar);
 				var ast = parser.parse(example);
-				var compiler = new maenulabs.meat.compiler.Compiler();
+				var compiler = new meat.compiler.Compiler();
 				var compiled = compiler.compile(ast);
 				console.log(ast);
 				$('#compiled').text(compiled);

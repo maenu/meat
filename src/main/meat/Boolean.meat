@@ -1,0 +1,96 @@
+"
+	Boolean
+	
+	needs Class, =, Nothing, itself
+"
+Boolean := (Class new)
+Boolean methods: {
+	methods at: 'not' put: {
+		"
+			Answers ¬ this.
+		"
+		this = false
+	}
+	methods at: 'and:' put: ({
+		"
+			Answers this ∧ aBoolean.
+		"
+		(this = true) ifTrue: {
+			aBoolean = true
+		} ifFalse: {
+			false itself
+		}
+	} with: ['aBoolean'])
+	methods at: 'or:' put: ({
+		"
+			Answers this ∨ aBoolean.
+		"
+		(this = true) ifTrue: {
+			true itself
+		} ifFalse: {
+			aBoolean = true
+		}
+	} with: ['aBoolean'])
+	methods at: 'implies:' put: ({
+		"
+			Answers this → aBoolean.
+		"
+		(this not) or: aBoolean
+	} with: ['aBoolean'])
+	methods at: 'xor:' put: ({
+		"
+			Answers this ⊕ aBoolean.
+		"
+		(this or: aBoolean) and: ((this and: aBoolean) not)
+	} with: ['aBoolean'])
+	methods at: 'nand:' put: ({
+		"
+			Answers this ⊼ aBoolean.
+		"
+		(this and: aBoolean) not
+	} with: ['aBoolean'])
+}
+False := (Class extending: Boolean)
+False methods: {
+	methods at: 'ifTrue:' put: ({
+		"
+			Answers nothing.
+		"
+		Nothing itself
+	} with: ['aBlock'])
+	methods at: 'ifFalse:' put: ({
+		"
+			Answers the answer of aBlock.
+		"
+		aBlock runIn: context
+	} with: ['aBlock'])
+	methods at: 'ifTrue:ifFalse:' put: ({
+		"
+			Answers the answer of aFalseBlock.
+		"
+		aFalseBlock runIn: context
+	} with: ['aTrueBlock' 'aFalseBlock'])
+}
+True := (Class extending: Boolean)
+True methods: {
+	methods at: 'ifTrue:' put: ({
+		"
+			Answers the answer of aBlock.
+		"
+		aBlock runIn: context
+	} with: ['aBlock'])
+	methods at: 'ifFalse:' put: ({
+		"
+			Answers nothing.
+		"
+		Nothing itself
+	} with: ['aBlock'])
+	methods at: 'ifTrue:ifFalse:' put: ({
+		"
+			Answers the answer of aTrueBlock.
+		"
+		aTrueBlock runIn: context
+	} with: ['aTrueBlock' 'aFalseBlock'])
+}
+false := (False new)
+true := (True new)

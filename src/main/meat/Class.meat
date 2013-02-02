@@ -1,0 +1,42 @@
+"
+	Class
+	
+	Create classes.
+"
+Class := (Object new)
+(Class oracle) define: 'new' perform: {
+	"
+		Creates and answers a Class.
+	"
+	class := (Object new)
+	methods := (Dictionary new)
+	variables := (Dictionary new)
+	(class oracle) define: 'new' perform: {
+		"
+			Creates and answers an instance of the Class.
+		"
+		instance := (Object new)
+		instanceContext := (Context new)
+		instanceContext at: 'this' put: instance
+		variables do: ({
+			instanceContext at: name put: (initializer run)
+		} with: ['name' 'initializer'])
+		instance oracle: {
+			(methods at: selector) runWith: arguments
+		}
+		instance itself
+	}
+	(class oracle) define: 'variables:' perform: ({
+		"
+			Allows setting variables.
+		"
+		initializer run
+	} with: ['initializer'])
+	(class oracle) define: 'methods:' perform: ({
+		"
+			Allows setting methods.
+		"
+		initializer run
+	} with: ['initializer'])
+	class itself
+}

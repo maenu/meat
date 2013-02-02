@@ -17,7 +17,7 @@ statements
 			return statement;
 		})+
 		{
-			return new maenulabs.meat.ast.StatementsNode(statements);
+			return new meat.ast.StatementsNode(statements);
 		}
 
 statement
@@ -30,7 +30,7 @@ comment
 			if (indent.length != expectedIndent) {
 				throw new Error('bad indent');
 			}
-			return new maenulabs.meat.ast.CommentNode(commentLines);
+			return new meat.ast.CommentNode(commentLines);
 		}
 
 commentLine
@@ -45,12 +45,11 @@ commentLine
 messageSend
 	= expression:expression message:message
 		{
-			return new maenulabs.meat.ast.MessageSendNode(expression, message);
+			return new meat.ast.MessageSendNode(expression, message);
 		}
 
 expression
 	= literal
-	/ comment
 	/ '(' messageSend:messageSend ')'
 		{
 			return messageSend;
@@ -58,7 +57,6 @@ expression
 
 literal
 	= variable
-	/ object
 	/ block
 	/ character
 	/ string
@@ -68,13 +66,7 @@ literal
 variable
 	= identifier:[a-zA-Z]+
 		{
-			return new maenulabs.meat.ast.VariableNode(identifier.join(''));
-		}
-
-object
-	= '.'
-		{
-			return new maenulabs.meat.ast.ObjectNode();
+			return new meat.ast.VariableNode(identifier.join(''));
 		}
 
 block
@@ -83,7 +75,7 @@ block
 			if (indent.length != expectedIndent) {
 				throw new Error('bad indent');
 			}
-			return new maenulabs.meat.ast.BlockNode(statements);
+			return new meat.ast.BlockNode(statements);
 		}
 
 indent
@@ -99,31 +91,25 @@ dedent
 character
 	= '$' character:.
 		{
-			return new maenulabs.meat.ast.CharacterNode(character);
+			return new meat.ast.CharacterNode(character);
 		}
 
 string
 	= '\'' string:[^']* '\''
 		{
-			return new maenulabs.meat.ast.StringNode(string.join(''));
+			return new meat.ast.StringNode(string.join(''));
 		}
 
 number
-	= signum:'-'? integer:[0-9]+ fraction:('.' fraction:[0-9]+
+	= digits:[0-9]+
 		{
-			return '.' + fraction.join('');
-		})?
-		{
-			if (signum != '-') {
-				signum = '+';
-			}
-			return new maenulabs.meat.ast.NumberNode(parseFloat(signum + integer.join('') + fraction));
+			return new meat.ast.NumberNode(parseInt(digits.join('')));
 		}
 
 list
 	= '[]'
 		{
-			return new maenulabs.meat.ast.ListNode([]);
+			return new meat.ast.ListNode([]);
 		}
 	/ '[' expressions:(firstExpression:expression nextExpressions:(' ' nextExpression:expression
 		{
@@ -137,7 +123,7 @@ list
 			return expressions;
 		}) ']'
 		{
-			return new maenulabs.meat.ast.ListNode(expressions);
+			return new meat.ast.ListNode(expressions);
 		}
 
 message
@@ -152,15 +138,15 @@ message
 				selector.push(pairs[i][0]);
 				arguments.push(pairs[i][1]);
 			}
-			return new maenulabs.meat.ast.KeywordMessageNode(selector.join(''), arguments);
+			return new meat.ast.KeywordMessageNode(selector.join(''), arguments);
 		}
 	/ ' ' selector:binary ' ' argument:expression
 		{
-			return new maenulabs.meat.ast.BinaryMessageNode(selector, argument);
+			return new meat.ast.BinaryMessageNode(selector, argument);
 		}
 	/ ' ' selector:unary
 		{
-			return new maenulabs.meat.ast.UnaryMessageNode(selector);
+			return new meat.ast.UnaryMessageNode(selector);
 		}
 
 unary
@@ -170,7 +156,7 @@ unary
 		}
 
 binary
-	= selector:[+\-*/=<>:]+
+	= selector:[+\-*/=<>:\.]+
 		{
 	        return selector.join('');
 		}

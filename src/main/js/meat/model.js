@@ -4,11 +4,10 @@
  * @author Manuel Leuenberger
  */
 
-var maenulabs = maenulabs || {};
-maenulabs.meat = maenulabs.meat || {};
-maenulabs.meat.model = maenulabs.meat.model || {};
+var meat = meat || {};
+meat.model = meat.model || {};
 
-maenulabs.meat.model.Oracle = new Class(
+meat.model.Oracle = new Class(
 	Object,
 	function () {
 		Object.apply(this, arguments);
@@ -19,11 +18,11 @@ maenulabs.meat.model.Oracle = new Class(
 		}
 	});
 
-maenulabs.meat.model.Object = new Class(
+meat.model.Object = new Class(
 	Object,
 	function () {
 		Object.apply(this, arguments);
-		this.oracle = new maenulabs.meat.model.Oracle();
+		this.oracle = new meat.model.Oracle();
 		this.oracle.methods['oracle'] = function (context) {
 			return this.oracle
 		};
@@ -45,10 +44,10 @@ maenulabs.meat.model.Object = new Class(
 		}
 	});
 
-maenulabs.meat.model.Block = new Class(
-	maenulabs.meat.model.Object,
+meat.model.Block = new Class(
+	meat.model.Object,
 	function (block) {
-		maenulabs.meat.model.Object.apply(this, arguments);
+		meat.model.Object.apply(this, arguments);
 		this.block = block;
 		this.context = null;
 		this.oracle.methods['in:'] = function (context) {
@@ -65,10 +64,10 @@ maenulabs.meat.model.Block = new Class(
 		
 	});
 	
-maenulabs.meat.model.Dictionary = new Class(
-	maenulabs.meat.model.Object,
+meat.model.Dictionary = new Class(
+	meat.model.Object,
 	function () {
-		maenulabs.meat.model.Object.apply(this, arguments);
+		meat.model.Object.apply(this, arguments);
 		this.map = {};
 		this.oracle.methods['at:'] = function (context) {
 			var arguments = context.respondTo('at:', ['arguments'], this, context);
@@ -86,10 +85,10 @@ maenulabs.meat.model.Dictionary = new Class(
 		
 	});
 
-maenulabs.meat.model.Variable = new Class(
-	maenulabs.meat.model.Object,
+meat.model.Variable = new Class(
+	meat.model.Object,
 	function (identifier) {
-		maenulabs.meat.model.Object.apply(this, arguments);
+		meat.model.Object.apply(this, arguments);
 		this.identifier = identifier;
 		this.value = null;
 		this.oracle.methods['value'] = function (context) {
@@ -105,7 +104,7 @@ maenulabs.meat.model.Variable = new Class(
 		
 	});
 
-maenulabs.meat.model.Interpreter = new Class(
+meat.model.Interpreter = new Class(
 	Object,
 	function () {
 		Object.apply(this, arguments);

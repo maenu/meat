@@ -6,16 +6,23 @@
 	line
 	comment
 "
-a := .
+a := 1
 a unary
 a > 1
 1 > a
 a > b
 (a > b) unary
+(a > b) > c
+(a > b) keyword: c
 a keyword: 1
-a keyword: "
-	comment argument
-"
+a ifTrue: {
+	a + 1
+}
+a ifTrue: {
+	a + 1
+} ifFalse: {
+	a + 2
+}
 a keyword: 1 plus: 2
 a keyword: (b plus: 2)
 a execute: {
@@ -29,11 +36,11 @@ a := {
 		a + 1
 	}
 }
+{
+	a + 1
+} for: 1
+a add: (1 . 2)
 a add: 'sweet'
-a add: 1.2
-a add: -1.2
-a add: 1
-a add: -1
 a add: []
 a add: [1 2 3]
 a add: $a

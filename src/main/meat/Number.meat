@@ -1,0 +1,46 @@
+needed:
+	Bit type
+	Bits class
+	List class
+	Distributor class
+	Collector class
+
+"
+	Natural number.
+"
+Natural := (Class new)
+(Natural instance) variables: {
+	variables at: 'bits' put: {
+		Bits new
+	}
+}
+(Natural instance) methods: {
+	methods at: 'bits' put: {
+		"
+			Answers the bits.
+		"
+		bits
+	}
+	methods at: 'bits:' put: ({
+		"
+			Sets bits to someBits.
+		"
+	 	bits := someBits
+	} with: ['someBits'])
+	methods at: '+' put: ({
+		"
+			Answers a Natural plus aNatural.
+		"
+		carry := (Bit zero)
+		sum := (Natural new)
+		distributor := (Distributor to: [(bits reversed) ((aNatural bits) reversed)] do: ({
+			list behead
+		} with: ['list']))
+		distributor do: ({
+			bit := ((a and: b) and: carry)
+			carry := 
+			(sum bits) prepend: bit
+		} with: ['a' 'b'])
+		sum itself
+	} with: ['aNatural'])
+})
