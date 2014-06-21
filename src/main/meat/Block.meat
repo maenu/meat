@@ -1,20 +1,22 @@
 "
 	Block
 "
-
-Block oracle: {
-	context at: 'oracleContext' put: (Context new)
-	(context at: 'oracleContext') at: 'oldOracle' put: (context oracle)
-	{
-		"available in oracle context: selector arguments sender receiver"
-		((context at: 'selector') = 'send:with:in:to:') ifTrue: {
-			(((context at: 'arguments') at: 1) = ':=') ifTrue: {
-				((context at: 'arguments') at: 4) value: (((context at: 'arguments') at: 2) at: 1)
-			} ifFalse: {
-				((context at: 'arguments') at: 4) receive: ((context at: 'arguments') at: 1) with: ((context at: 'arguments') at: 2) in: ((context at: 'arguments') at: 3)
-			}
-		} ifFalse {
-			(context at: 'oldOracle') runIn: context
-		}
-	} in: (context at: 'oracleContext')
-} run
+Block := (Class extending: List with: {
+	methods at: 'run' put: {
+		"
+			Runs all statements and answers the answer of the last statement.
+		"
+		this do: ({
+			aStatement run
+		} with: ['aStatement'])
+	}
+	methods at: 'with:' put: ({
+		"
+			Answers a Closure with the variables available through the specified identifiers.
+		"
+		Closure from: this with: someIdentifiers
+	} with: ['someIdentifiers'])
+})
+Closure := (Class extending: Block with: {
+	variables
+})

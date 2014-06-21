@@ -1,20 +1,10 @@
-needed:
-	Bit type
-	Bits class
-	List class
-	Distributor class
-	Collector class
-
 "
 	Natural number.
 "
-Natural := (Class new)
-(Natural instance) variables: {
+Natural := (Class with: {
 	variables at: 'bits' put: {
 		Bits new
 	}
-}
-(Natural instance) methods: {
 	methods at: 'bits' put: {
 		"
 			Answers the bits.

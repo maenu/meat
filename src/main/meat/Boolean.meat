@@ -1,17 +1,47 @@
 "
 	Boolean
 	
-	needs Class, =, Nothing, itself
+	defines
+	    Boolean
+	    False
+	    True
+	    false
+	    true
+	    boolean
+	        not
+	        and:
+	        or:
+	        implies:
+	        xor:
+	        nand:
+	        ifTrue:
+	        ifFalse:
+	        ifTrue:ifFalse:
+	
+	uses
+	    Class ✓
+	        with: ✓ 
+	        extending:with: ✓
+	    Error
+	        raise:
+	    dictionary
+	        at:put:
+	    object
+	        =
+	        :=
+	        itself
+	    block
+	        expecting:
+	        run
 "
-Boolean := (Class new)
-Boolean methods: {
-	methods at: 'not' put: {
+Boolean := (Class with: ({
+	someMethods at: 'not' put: {
 		"
 			Answers ¬ this.
 		"
 		this = false
 	}
-	methods at: 'and:' put: ({
+	someMethods at: 'and:' put: ({
 		"
 			Answers this ∧ aBoolean.
 		"
@@ -20,8 +50,8 @@ Boolean methods: {
 		} ifFalse: {
 			false itself
 		}
-	} with: ['aBoolean'])
-	methods at: 'or:' put: ({
+	} expecting: ['aBoolean'])
+	someMethods at: 'or:' put: ({
 		"
 			Answers this ∨ aBoolean.
 		"
@@ -30,67 +60,83 @@ Boolean methods: {
 		} ifFalse: {
 			aBoolean = true
 		}
-	} with: ['aBoolean'])
-	methods at: 'implies:' put: ({
+	} expecting: ['aBoolean'])
+	someMethods at: 'implies:' put: ({
 		"
 			Answers this → aBoolean.
 		"
 		(this not) or: aBoolean
-	} with: ['aBoolean'])
-	methods at: 'xor:' put: ({
+	} expecting: ['aBoolean'])
+	someMethods at: 'xor:' put: ({
 		"
 			Answers this ⊕ aBoolean.
 		"
 		(this or: aBoolean) and: ((this and: aBoolean) not)
-	} with: ['aBoolean'])
-	methods at: 'nand:' put: ({
+	} expecting: ['aBoolean'])
+	someMethods at: 'nand:' put: ({
 		"
 			Answers this ⊼ aBoolean.
 		"
 		(this and: aBoolean) not
-	} with: ['aBoolean'])
-}
-False := (Class extending: Boolean)
-False methods: {
-	methods at: 'ifTrue:' put: ({
+	} expecting: ['aBoolean'])
+	someMethods at: 'ifTrue:' put: ({
+		"
+			Answers the answer of aBlock if itself is true.
+		"
+		Error raise: 'should implement it'
+	} expecting: ['aBlock'])
+	someMethods at: 'ifFalse:' put: ({
+		"
+			Answers the answer of aBlock if itself is false.
+		"
+		Error raise: 'should implement it'
+	} expecting: ['aBlock'])
+	someMethods at: 'ifTrue:ifFalse:' put: ({
+		"
+			Answers the answer of aTrueBlock if itself is true, of aFalseBlock if itself is false.
+		"
+		Error raise: 'should implement it'
+	} expecting: ['aTrueBlock' 'aFalseBlock'])
+} expecting: ['someConstructors' 'someMethods' 'someVariables']))
+False := (Class extending: Boolean with: ({
+	someMethods at: 'ifTrue:' put: ({
 		"
 			Answers nothing.
 		"
 		Nothing itself
-	} with: ['aBlock'])
-	methods at: 'ifFalse:' put: ({
+	} expecting: ['aBlock'])
+	someMethods at: 'ifFalse:' put: ({
 		"
 			Answers the answer of aBlock.
 		"
-		aBlock runIn: context
-	} with: ['aBlock'])
-	methods at: 'ifTrue:ifFalse:' put: ({
+		aBlock run
+	} expecting: ['aBlock'])
+	someMethods at: 'ifTrue:ifFalse:' put: ({
 		"
 			Answers the answer of aFalseBlock.
 		"
-		aFalseBlock runIn: context
-	} with: ['aTrueBlock' 'aFalseBlock'])
-}
-True := (Class extending: Boolean)
-True methods: {
-	methods at: 'ifTrue:' put: ({
+		aFalseBlock run
+	} expecting: ['aTrueBlock' 'aFalseBlock'])
+} expecting: ['someConstructors' 'someMethods' 'someVariables']))
+True := (Class extending: Boolean with: ({
+	someMethods at: 'ifTrue:' put: ({
 		"
 			Answers the answer of aBlock.
 		"
-		aBlock runIn: context
-	} with: ['aBlock'])
-	methods at: 'ifFalse:' put: ({
+		aBlock run
+	} expecting: ['aBlock'])
+	someMethods at: 'ifFalse:' put: ({
 		"
 			Answers nothing.
 		"
 		Nothing itself
-	} with: ['aBlock'])
-	methods at: 'ifTrue:ifFalse:' put: ({
+	} expecting: ['aBlock'])
+	someMethods at: 'ifTrue:ifFalse:' put: ({
 		"
 			Answers the answer of aTrueBlock.
 		"
-		aTrueBlock runIn: context
-	} with: ['aTrueBlock' 'aFalseBlock'])
-}
+		aTrueBlock run
+	} expecting: ['aTrueBlock' 'aFalseBlock'])
+} expecting: ['someConstructors' 'someMethods' 'someVariables']))
 false := (False new)
 true := (True new)

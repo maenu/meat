@@ -1,42 +1,167 @@
 "
 	Class
 	
-	Create classes.
+	defines
+	    Class
+	        new
+	        with:
+	        extending:with:
+	    class
+	        new
+	
+	uses
+	    Object
+	        new
+	    object
+	        =
+	        clone
+	        oracle
+	        oracle:
+	        itself
+	    Dictionary
+	        new
+	    dictionary
+	        at:put:
+	        at:
+	    list
+	        do:
+	    block
+	        expecting:
+	        in:
+	        runIn:
+	    Context
+	        new
 "
 Class := (Object new)
-(Class oracle) define: 'new' perform: {
+Class oracle: ({
+	(aSelector = 'new') ifTrue: {
+		"
+			Creates and answers a Class.
+		"
+		class := (Object new)
+		classContext := (Context new)
+		classContext at: 'constructors' put: (Dictionary new)
+		classContext at: 'methods' put: (Dictionary new)
+		classContext at: 'variables' put: (Set new)
+		class oracle: (({
+			(aSelector = 'new') ifTrue: {
+				"
+					Creates and answers an instance of the Class.
+				"
+				this := (Object new)
+				thisContext := (Context new)
+				thisContext at: 'this' put: this
+				variables do: ({
+					thisContext at: aString put: Nothing
+				} with: ['aString'])
+				this oracle: {
+					(methods at: selector) runWith: arguments
+				}
+				this itself
+			} ifFalse: {
+				(aSelector = 'constructors') ifTrue: {
+					"
+						Answers the constructors.
+					"
+					constructors itself
+				}
+				(aSelector = 'methods') ifTrue: {
+					"
+						Answers the methods.
+					"
+					methods itself
+				}
+				(aSelector = 'variables') ifTrue: {
+					"
+						Answers the variables.
+					"
+					variables itself
+				}
+			}
+		} expecting: ['aSelector' 'someArguments' 'aReceiver' 'aSender']) in: classContext)
+		class itself
+	}
+} expecting: ['aSelector' 'someArguments' 'aReceiver' 'aSender'])
+
+
+
+(Class oracle) define: 'new' perform: ({
 	"
 		Creates and answers a Class.
 	"
 	class := (Object new)
+	constructors := (Dictionary new)
 	methods := (Dictionary new)
 	variables := (Dictionary new)
 	(class oracle) define: 'new' perform: {
 		"
 			Creates and answers an instance of the Class.
 		"
-		instance := (Object new)
-		instanceContext := (Context new)
-		instanceContext at: 'this' put: instance
+		this := (Object new)
+		thisContext := (Context new)
+		thisContext at: 'this' put: this
 		variables do: ({
-			instanceContext at: name put: (initializer run)
-		} with: ['name' 'initializer'])
-		instance oracle: {
+			thisContext at: aString put: (aBlock run)
+		} with: ['aString' 'aBlock'])
+		this oracle: {
 			(methods at: selector) runWith: arguments
 		}
-		instance itself
+		this itself
 	}
-	(class oracle) define: 'variables:' perform: ({
+	(class oracle) define: 'constructors' perform: {
 		"
-			Allows setting variables.
+			Answers the constructors.
 		"
-		initializer run
-	} with: ['initializer'])
-	(class oracle) define: 'methods:' perform: ({
+		constructors itself
+	}
+	(class oracle) define: 'methods' perform: {
 		"
-			Allows setting methods.
+			Answers the methods.
 		"
-		initializer run
-	} with: ['initializer'])
+		methods itself
+	}
+	(class oracle) define: 'variables' perform: {
+		"
+			Answers the variables.
+		"
+		variables itself
+	}
 	class itself
-}
+} with: ['aBlock'])
+(Class oracle) define: 'with:' perform: ({
+	"
+		Creates and answers a Class with running aBlock to define constructors, methods and variables.
+	"
+	class := (Class new)
+	aBlock runWith: [constructors methods variables]
+	class itself
+} with: ['aBlock'])
+(Class oracle) define: 'extending:with:' perform: ({
+	"
+		Creates and answers a Class extending aClass with running aBlock to define methods and variables.
+	"
+	class := (Class with: aBlock)
+	super := aClass
+	(class oracle) define: 'new' perform: {
+		"
+			Creates and answers an instance of the Class.
+		"
+		this := (Object new)
+		thisContext := (Context new)
+		thisContext at: 'this' put: this
+		thisContext at: 'super' put: super
+		((super variables) withAll: variables) do: ({
+			thisContext at: aString put: (aBlock run)
+		} with: ['aString' 'aBlock'])
+		superOracle := (this oracle)
+		this oracle: {
+			(methods includes: selector) ifTrue: {
+				superOracle send: selector with: arguments to: this from: this
+			} ifFalse: {
+				(methods at: selector) runWith: arguments
+			}
+		}
+		this itself
+	}
+	class itself
+} with: ['aClass' 'aBlock'])
