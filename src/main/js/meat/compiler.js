@@ -10,7 +10,7 @@ meat.compiler = meat.compiler || {};
 var Type = ch.maenulabs.type.Type;
 
 meat.compiler.Compiler = new Type(Object, {
-	compile: function(ast) {
+	compile: function (ast) {
 		var visitor = new meat.compiler.AstVisitor();
 		ast.accept(visitor);
 		return visitor.source;
@@ -18,10 +18,10 @@ meat.compiler.Compiler = new Type(Object, {
 });
 
 meat.compiler.AstVisitor = new Type(Object, {
-	initialize: function() {
+	initialize: function () {
 		this.source = '';
 	},
-	visitStatementsNode: function(node) {
+	visitStatementsNode: function (node) {
 		for (var i = 0; i < node.statements.length - 1; i++) {
 			node.statements[i].accept(this);
 			this.source += ';\n';
@@ -30,7 +30,7 @@ meat.compiler.AstVisitor = new Type(Object, {
 		node.statements[node.statements.length - 1].accept(this);
 		this.source += ';\n';
 	},
-	visitCommentNode: function(node) {
+	visitCommentNode: function (node) {
 		this.source += 'new meat.model.Comment(new meat.model.List([';
 		for (var i = 0; i < node.lines.length - 1; i++) {
 			this.source += 'new meat.model.String(\'';
@@ -40,61 +40,26 @@ meat.compiler.AstVisitor = new Type(Object, {
 		this.source += 'new meat.model.String(\'';
 		this.source += node.lines[node.lines.length - 1];
 		this.source += '\')';
-		this.source += '])';
+		this.source += ']))';
 	},
-	visitMessageSendNode: function(node) {
+	visitMessageSendNode: function (node) {
 		this.source += 'interpreter.interpret(';
 		node.message.accept(this);
 		this.source += ', ';
 		node.expression.accept(this);
 		this.source += ', context)';
 	},
-	visitVariableNode: function(node) {
-		this.source += 'new meat.model.Variable(new meat.model.String(\'';
-		this.source += node.identifier;
-		this.source += '\'))';
-	},
-	visitBlockNode: function(node) {
-		this.source += 'new meat.model.Block(function (context) {\n';
-		node.statements.accept(this);
-		this.source += '})';
-	},
-	visitCharacterNode: function(node) {
-		this.source += 'new meat.model.Character(\'';
-		this.source += node.character
-		this.source += '\')';
-	},
-	visitStringNode: function(node) {
-		this.source += 'new meat.model.String(\'';
-		this.source += node.string
-		this.source += '\')';
-	},
-	visitNumberNode: function(node) {
-		this.source += 'new meat.model.Number('
-		this.source += node.number
-		this.source += ')';
-	},
-	visitListNode: function(node) {
-		this.source += 'new meat.model.List([';
-		for (var i = 0; i < node.elements.length; i++) {
-			if (i > 0)  {
-				this.source += ', ';
-			}
-			node.elements[i].accept(this);
-		}
-		this.source += '])';
-	},
-	visitUnaryMessageNode: function(node) {
+	visitUnaryMessageNode: function (node) {
 		this.source += 'new meat.model.String(\'' + node.selector + '\')';
 		this.source += ', new meat.model.List([]), this';
 	},
-	visitBinaryMessageNode: function(node) {
+	visitBinaryMessageNode: function (node) {
 		this.source += 'new meat.model.String(\'' + node.selector + '\')';
 		this.source += ', new meat.model.List([';
 		node.argument.accept(this);
 		this.source += ']), this';
 	},
-	visitKeywordMessageNode: function(node) {
+	visitKeywordMessageNode: function (node) {
 		this.source += 'new meat.model.String(\'' + node.selector + '\')';
 		this.source += ', new meat.model.List([';
 		for (var i = 0; i < node.arguments.length; i++) {
@@ -104,5 +69,40 @@ meat.compiler.AstVisitor = new Type(Object, {
 			node.arguments[i].accept(this);
 		}
 		this.source += ']), this';
+	},
+	visitVariableNode: function (node) {
+		this.source += 'new meat.model.Variable(new meat.model.String(\'';
+		this.source += node.identifier;
+		this.source += '\'))';
+	},
+	visitBlockNode: function (node) {
+		this.source += 'new meat.model.Block(function (context) {\n';
+		node.statements.accept(this);
+		this.source += '})';
+	},
+	visitCharacterNode: function (node) {
+		this.source += 'new meat.model.Character(\'';
+		this.source += node.character
+		this.source += '\')';
+	},
+	visitStringNode: function (node) {
+		this.source += 'new meat.model.String(\'';
+		this.source += node.string
+		this.source += '\')';
+	},
+	visitNumberNode: function (node) {
+		this.source += 'new meat.model.Number('
+		this.source += node.number
+		this.source += ')';
+	},
+	visitListNode: function (node) {
+		this.source += 'new meat.model.List([';
+		for (var i = 0; i < node.elements.length; i++) {
+			if (i > 0)  {
+				this.source += ', ';
+			}
+			node.elements[i].accept(this);
+		}
+		this.source += '])';
 	}
 });
