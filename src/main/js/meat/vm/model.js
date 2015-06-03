@@ -5,98 +5,133 @@
  */
 
 var meat = meat || {};
+meat.vm = meat.vm || {};
 meat.vm.model = meat.vm.model || {};
 
 var Type = ch.maenulabs.type.Type;
 
-meat.vm.model.Oracle = new Type(Object, {
-	intitialize: function () {
-		this.methods = {};
-	},
-	respondTo: function (selector, parameters, context) {
-		return this.methods[selector].apply(this, [context])
-	}
-});
-
 meat.vm.model.Object = new Type(Object, {
 	intitialize: function () {
+		this.base('initialize')();
 		this.oracle = new meat.vm.model.Oracle();
-		this.oracle.methods['oracle'] = function (context) {
+		this.oracle.register('oracle', (function (context) {
 			return this.oracle;
-		};
-		this.oracle.methods['oracle:'] = function (context) {
-			var parameters = context.respondTo('at:', ['parameters'], context);
-			this.oracle = parameters.respondTo('at:', [0], context);
+		}).bind(this));
+		this.oracle.register('oracle:', (function (context) {
+			var parameters = context.respondTo('parameters', [], context);
+			this.oracle = parameters.respondTo('at:', [1], context);
 			return this;
-		}
+		}).bind(this));
 	},
 	respondTo: function (selector, parameters, context) {
-		context.respondTo('at:put:', ['selector', selector], context);
-		context.respondTo('at:put:', ['parameters', parameters], context);
+		context = context.respondTo('newContextExtending:selector:parameters:receiver:', [context, selector, parameters, this], context);
 		context.respondTo('at:put:', ['this', this], context);
-		return this.oracle.respondTo('runIn:', [context], context);
+		return this.oracle.respondTo(selector, parameters, context);
 	}
 });
 
-meat.vm.model.Block = new Type(meat.vm.model.Object, {
-	intitialize: function (block) {
+meat.vm.model.Oracle = new Type(meat.vm.model.Object, {
+	intitialize: function (methods) {
 		this.base('initialize')();
-		this.block = block;
-		this.context = null;
-		this.oracle.methods['in:'] = function (context) {
-			this.context = context;
-			return this;
-		};
-		this.oracle.methods['runIn:'] = function (context) {
-			return this.block.apply(this, [context]);
-		};
-		this.oracle.methods['run'] = function (context) {
-			return this.block.apply(this, [this.context]);
-		};
+		if (methods === undefined) {
+			methods = {};
+		}
+		this.methods = methods;
+	},
+	respondTo: function (selector, parameters, context) {
+		var receiver = context.respondTo('receiver', [], context);
+		return this.methods[selector].apply(receiver, [context]);
+	},
+	register: function (selector, f) {
+		this.methods[selector] = f;
+	},
+	getMethods: function () {
+		return this.methods;
 	}
 });
 
-meat.vm.model.Dictionary = new Type(meat.vm.model.Object, {
-	intitialize: function () {
-		this.base('initialize')();
-		this.map = {};
-		this.oracle.methods['at:'] = function (context) {
-			var parameters = context.respondTo('at:', ['parameters'], context);
-			var name = parameters.respondTo('at:', [1], context);
-			return this.map[name];
-		};
-		this.oracle.methods['at:put:'] = function (context) {
-			var parameters = context.respondTo('at:', ['parameters'], context);
-			var name = parameters.respondTo('at:', [1], context);
-			var value = parameters.respondTo('at:', [2], context);
-			this.map[name] = value;
-			return this;
-		};
+meat.vm.model.VariableOracle = new Type(meat.vm.model.Oracle, {
+	respondTo: function (selector, parameters, context) {
+		if (this.methods[selector] !== undefined) {
+			return this.base('respondTo')(selector, parameters, context);
+		} else {
+			var variable = context.respondTo('at:', ['this'], context);
+			var object = variable.respondTo('object', [], context);
+			return object.respondTo(selector, parameters, context);
+		}
 	}
 });
 
 meat.vm.model.Variable = new Type(meat.vm.model.Object, {
-	intitialize: function (identifier) {
+	intitialize: function () {
 		this.base('initialize')();
-		this.identifier = identifier;
-		this.value = null;
-		this.oracle.methods['value'] = function (context) {
-			return this.value;
-		};
-		this.oracle.methods['value:'] = function (context) {
-			var parameters = context.respondTo('at:', ['parameters'], context);
-			var name = parameters.respondTo('at:', [1], context);
-			this.map[name] = value;
+		this.object = new meat.vm.model.Object();
+		this.oracle = new meat.vm.model.VariableOracle(this.oracle.getMethods());
+		this.oracle.register('object', (function (context) {
+			return this.object;
+		}).bind(this));
+		this.oracle.register('object:', (function (context) {
+			var parameters = context.respondTo('parameters', [], context);
+			var object = parameters.respondTo('at:', [1], context);
+			this.object = object;
 			return this;
-		};
+		}).bind(this));
 	}
 });
 
-meat.vm.model.Interpreter = new Type(Object, {
-	interpret: function (selector, parameters, receiver, context) {
-		if (selector == ':=') {
-			context;
-		}
-		return receiver.respondTo(selector, parameters, context);
+meat.vm.model.Context = new Type(meat.vm.model.Object, {
+	intitialize: function () {
+		this.base('initialize')();
+		this.parent = new meat.vm.model.Object();
+		this.selector = new meat.vm.model.Object();
+		this.parameters = new meat.vm.model.Object();
+		this.receiver = new meat.vm.model.Object();
+		this.variables = {};
+		this.oracle.register('parent', (function (context) {
+			return this.parent;
+		}).bind(this));
+		this.oracle.register('selector', (function (context) {
+			return this.selector;
+		}).bind(this));
+		this.oracle.register('parameters', (function (context) {
+			return this.parameters;
+		}).bind(this));
+		this.oracle.register('receiver', (function (context) {
+			return this.receiver;
+		}).bind(this));
+		this.oracle.register('newContextExtending:selector:parameters:receiver:', (function (context) {
+			var parameters = context.respondTo('parameters', [], context);
+			this.parent = parameters.respondTo('at:', [1], context);
+			this.selector = parameters.respondTo('at:', [2], context);
+			this.parameters = parameters.respondTo('at:', [3], context);
+			this.receiver = parameters.respondTo('at:', [4], context);
+			return this;
+		}).bind(this));
+		this.oracle.register('at:', (function (context) {
+			var parameters = context.respondTo('parameters', [], context);
+			var name = parameters.respondTo('at:', [1], context);
+			return this.variables[name];
+		}).bind(this));
+		this.oracle.register('at:put:', (function (context) {
+			var parameters = context.respondTo('parameters', [], context);
+			var name = parameters.respondTo('at:', [1], context);
+			var object = parameters.respondTo('at:', [2], context);
+			var variable = (this.variables[name] !== undefined)
+					? this.variables[name]
+					: context.respondTo('newVariable', [], context);
+			this.variables[name] = variable;
+			variable.respondTo('object:', [object], context);
+			return this;
+		}).bind(this));
+	}
+});
+
+meat.vm.model.Block = new Type(meat.vm.model.Object, {
+	intitialize: function (f) {
+		this.base('initialize')();
+		this.f = f;
+		this.oracle.register('runIn:', (function (context) {
+			return this.f.apply(this, [context]);
+		}).bind(this));
 	}
 });

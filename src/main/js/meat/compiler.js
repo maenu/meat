@@ -10,99 +10,114 @@ meat.compiler = meat.compiler || {};
 var Type = ch.maenulabs.type.Type;
 
 meat.compiler.Compiler = new Type(Object, {
-	compile: function (ast) {
-		var visitor = new meat.compiler.AstVisitor();
-		ast.accept(visitor);
-		return visitor.source;
-	}
-});
-
-meat.compiler.AstVisitor = new Type(Object, {
 	initialize: function () {
 		this.source = '';
 	},
-	visitStatementsNode: function (node) {
-		for (var i = 0; i < node.statements.length - 1; i++) {
-			node.statements[i].accept(this);
-			this.source += ';\n';
+	compile: function (ast) {
+		var visitor = new meat.compiler.Visitor(this);
+		this.append('function () {\n');
+		this.append('var context = new meat.vm.model.Context();');
+		ast.accept(visitor);
+		this.append('}');
+		return this.source;
+	},
+	append: function (string) {
+		this.source = this.source + string;
+	}
+});
+
+meat.compiler.Visitor = new Type(meat.ast.visitor.DepthFirst, {
+	initialize: function (compiler) {
+		this.base('initialize')();
+		this.compiler = compiler;
+	},
+	append: function (string) {
+		this.compiler.append(string);
+	},
+	visitStatements: function (node) {
+		var statements = node.getStatements();
+		for (var i = 0; i < statements.length - 1; i = i + 1) {
+			statements[i].accept(this);
+			this.append(';\n');
 		}
-		this.source += 'return ';
-		node.statements[node.statements.length - 1].accept(this);
-		this.source += ';\n';
+		this.append('return ');
+		statements[statements.length - 1].accept(this);
+		this.append(';\n');
 	},
-	visitCommentNode: function (node) {
-		this.source += 'new meat.model.Comment(new meat.model.List([';
-		for (var i = 0; i < node.lines.length - 1; i++) {
-			this.source += 'new meat.model.String(\'';
-			this.source += node.lines[i];
-			this.source += '\'), ';
+	visitComment: function (node) {
+		this.append('new meat.vm.model.Comment(new meat.vm.model.List([');
+		var lines = node.getLines();
+		for (var i = 0; i < lines.length - 1; i = i + 1) {
+			this.append('new meat.vm.model.String(\'');
+			this.append(lines[i]);
+			this.append('\'), ');
 		}
-		this.source += 'new meat.model.String(\'';
-		this.source += node.lines[node.lines.length - 1];
-		this.source += '\')';
-		this.source += ']))';
+		this.append('new meat.vm.model.String(\'');
+		this.append(lines[lines.length - 1]);
+		this.append('\')');
+		this.append(']))');
 	},
-	visitMessageSendNode: function (node) {
-		this.source += 'interpreter.interpret(';
-		node.message.accept(this);
-		this.source += ', ';
-		node.expression.accept(this);
-		this.source += ', context)';
+	visitMessageSend: function (node) {
+		this.append('(');
+		node.getReceiver().accept(this);
+		this.append(').respondTo(');
+		node.getMessage().accept(this);
+		this.append(')');
 	},
-	visitUnaryMessageNode: function (node) {
-		this.source += 'new meat.model.String(\'' + node.selector + '\')';
-		this.source += ', new meat.model.List([]), this';
+	visitUnaryMessage: function (node) {
+		this.append('new meat.vm.model.String(\'' + node.selector + '\')');
+		this.append(', new meat.vm.model.List([]), context');
 	},
-	visitBinaryMessageNode: function (node) {
-		this.source += 'new meat.model.String(\'' + node.selector + '\')';
-		this.source += ', new meat.model.List([';
-		node.argument.accept(this);
-		this.source += ']), this';
+	visitBinaryMessage: function (node) {
+		this.append('new meat.vm.model.String(\'' + node.selector + '\')');
+		this.append(', new meat.vm.model.List([');
+		this.base('visitBinaryMessage')(node);
+		this.append(']), context');
 	},
-	visitKeywordMessageNode: function (node) {
-		this.source += 'new meat.model.String(\'' + node.selector + '\')';
-		this.source += ', new meat.model.List([';
-		for (var i = 0; i < node.arguments.length; i++) {
-			if (i > 0)  {
-				this.source += ', ';
-			}
-			node.arguments[i].accept(this);
+	visitKeywordMessage: function (node) {
+		this.append('new meat.vm.model.String(\'' + node.selector + '\')');
+		this.append(', new meat.vm.model.List([');
+		var parameters = node.getParameters();
+		for (var i = 0; i < parameters.length - 1; i = i + 1) {
+			parameters[i].accept(this);
+			this.append(', ');
 		}
-		this.source += ']), this';
+		parameters[parameters.length - 1].accept(this);
+		this.append(']), context');
 	},
-	visitVariableNode: function (node) {
-		this.source += 'new meat.model.Variable(new meat.model.String(\'';
-		this.source += node.identifier;
-		this.source += '\'))';
+	visitVariable: function (node) {
+		this.append('context.respondTo(new meat.vm.model.String(\'at:\'), [new meat.vm.model.String(\'');
+		this.append(node.getName());
+		this.append('\')], context)');
 	},
-	visitBlockNode: function (node) {
-		this.source += 'new meat.model.Block(function (context) {\n';
-		node.statements.accept(this);
-		this.source += '})';
+	visitBlock: function (node) {
+		this.append('new meat.vm.model.Block(function (context) {\n');
+		this.base('visitBlock')(node);
+		this.append('})');
 	},
-	visitCharacterNode: function (node) {
-		this.source += 'new meat.model.Character(\'';
+	visitCharacter: function (node) {
+		this.append('new meat.vm.model.Character(\'');
 		this.source += node.character
-		this.source += '\')';
+		this.append('\')');
 	},
-	visitStringNode: function (node) {
-		this.source += 'new meat.model.String(\'';
+	visitString: function (node) {
+		this.append('new meat.vm.model.String(\'');
 		this.source += node.string
-		this.source += '\')';
+		this.append('\')');
 	},
-	visitNumberNode: function (node) {
-		this.source += 'new meat.model.Number('
-		this.source += node.number
-		this.source += ')';
+	visitNumber: function (node) {
+		this.source += 'new meat.vm.model.Number('
+		this.source += node.getNumber()
+		this.append(')');
 	},
-	visitListNode: function (node) {
-		this.source += 'new meat.model.List([';
-		for (var i = 0; i < node.elements.length; i++) {
-			if (i > 0)  {
-				this.source += ', ';
-			}
-			node.elements[i].accept(this);
+	visitList: function (node) {
+		this.append('new meat.vm.model.List([');
+		var items = node.getItems();
+		for (var i = 0; i < items.length - 1; i = i + 1) {
+			items[i].accept(this);
+			this.append(', ');
 		}
-		this.source += '])';
+		items[items.length - 1].accept(this);
+		this.append('])');
 	}
 });

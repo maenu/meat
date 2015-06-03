@@ -8,16 +8,6 @@
 	var expectedIndent = 0;
 }
 
-indent
-	= {
-		expectedIndent = expectedIndent + 1;
-	}
-
-dedent
-	= {
-		expectedIndent = expectedIndent - 1;
-	}
-
 statements
 	= statements:
 		(
@@ -32,6 +22,16 @@ statements
 		{
 			return new meat.ast.node.Statements(statements);
 		}
+
+indent
+	= {
+		expectedIndent = expectedIndent + 1;
+	}
+
+dedent
+	= {
+		expectedIndent = expectedIndent - 1;
+	}
 
 statement
 	= comment
@@ -118,9 +118,9 @@ literal
 	/ list
 
 variable
-	= identifier:[a-zA-Z]+
+	= name:[a-zA-Z]+
 		{
-			return new meat.ast.node.Variable(identifier.join(''));
+			return new meat.ast.node.Variable(name.join(''));
 		}
 
 block

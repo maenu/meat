@@ -109,15 +109,15 @@ meat.ast.node.KeywordMessage = new Type(meat.ast.node.AbstractMessage, {
 meat.ast.node.AbstractLiteral = new Type(meat.ast.node.Abstract);
 
 meat.ast.node.Variable = new Type(meat.ast.node.AbstractLiteral, {
-	initialize: function (identifier) {
+	initialize: function (name) {
 		this.base('initialize')();
-		this.identifier = identifier;
+		this.name = name;
 	},
 	accept: function (visitor) {
 		visitor.visitVariable(this);
 	},
-	getIdentifier: function () {
-		return this.identifier;
+	getName: function () {
+		return this.name;
 	}
 });
 
