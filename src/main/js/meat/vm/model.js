@@ -23,18 +23,13 @@ meat.vm.model.Object = new Type(Object, {
 	},
 	respondTo: function (selector, parameters, context) {
 		context = context.respondTo('newContextBelow:receivedBy:', [context, this], context);
-		context.respondTo('at:put:', ['this', this], context);
-		context.respondTo('at:put:', ['context', context], context);
 		return this.oracle.respondTo(selector, parameters, context, this);
 	}
 });
 
 meat.vm.model.Oracle = new Type(Object, {
-	initialize: function (methods) {
-		if (methods === undefined) {
-			methods = {};
-		}
-		this.methods = methods;
+	initialize: function () {
+		this.methods = {};
 	},
 	respondTo: function (selector, parameters, context, receiver) {
 		return this.methods[selector].apply(receiver, [selector, parameters, context]);
@@ -51,11 +46,10 @@ meat.vm.model.VariableOracle = new Type(meat.vm.model.Oracle, {
 	respondTo: function (selector, parameters, context, receiver) {
 		if (this.methods[selector] !== undefined) {
 			return this.base('respondTo')(selector, parameters, context, receiver);
-		} else {
-			var variable = context.respondTo('at:', ['this'], context);
-			var object = variable.respondTo('object', [], context);
-			return object.respondTo(selector, parameters, context);
 		}
+		var variable = context.respondTo('at:', ['this'], context);
+		var object = variable.respondTo('object', [], context);
+		return object.respondTo(selector, parameters, context);
 	}
 });
 
@@ -81,6 +75,8 @@ meat.vm.model.Context = new Type(meat.vm.model.Object, {
 		this.parent = parent;
 		this.receiver = receiver;
 		this.variables = {};
+		this.variables['context'] = this;
+		this.variables['this'] = this.receiver;
 		// bind to this since we bypass recursion
 		this.oracle.register('newContextBelow:receivedBy:', (function (selector, parameters, context) {
 			return new meat.vm.model.Context(parameters[0], parameters[1]);
