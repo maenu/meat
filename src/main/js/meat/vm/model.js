@@ -135,3 +135,36 @@ meat.vm.model.Block = new Type(meat.vm.model.Object, {
 		}).bind(this));
 	}
 });
+
+meat.vm.model.Character = new Type(meat.vm.model.Object, {
+	intitialize: function (character) {
+		this.base('initialize')();
+		this.character = character;
+	}
+});
+
+meat.vm.model.String = new Type(meat.vm.model.Object, {
+	intitialize: function (string) {
+		this.base('initialize')();
+		this.string = string;
+	}
+});
+
+meat.vm.model.Number = new Type(meat.vm.model.Object, {
+	intitialize: function (number) {
+		this.base('initialize')();
+		this.number = number;
+	}
+});
+
+meat.vm.model.List = new Type(meat.vm.model.Object, {
+	intitialize: function (list) {
+		this.base('initialize')();
+		this.list = list;
+		this.oracle.register('at:', (function (context) {
+			var parameters = context.respondTo('parameters', [], context);
+			var index = parameters.respondTo('at:', [1], context);
+			return this.list[index];
+		}).bind(this));
+	}
+});

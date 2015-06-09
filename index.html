@@ -57,7 +57,7 @@
 					var ast = parser.parse(source);
 					var compiled = compiler.compile(ast);
 					console.log(ast);
-					$('#compiled .code').text(compiled);
+					$('#compiled .code').val(compiled);
 				});
 			});
 		</script>

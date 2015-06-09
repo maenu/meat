@@ -16,9 +16,9 @@ meat.compiler.Compiler = new Type(Object, {
 	compile: function (ast) {
 		var visitor = new meat.compiler.Visitor(this);
 		this.append('function () {\n');
-		this.append('var context = new meat.vm.model.Context();');
+		this.append('var context = new meat.vm.model.Context();\n');
 		ast.accept(visitor);
-		this.append('}');
+		this.append('}\n');
 		return this.source;
 	},
 	append: function (string) {
