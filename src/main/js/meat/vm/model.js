@@ -11,36 +11,33 @@ meat.vm.model = meat.vm.model || {};
 var Type = ch.maenulabs.type.Type;
 
 meat.vm.model.Object = new Type(Object, {
-	intitialize: function () {
-		this.base('initialize')();
+	initialize: function () {
 		this.oracle = new meat.vm.model.Oracle();
-		this.oracle.register('oracle', (function (context) {
+		this.oracle.register('oracle', function (selector, parameters, context) {
 			return this.oracle;
-		}).bind(this));
-		this.oracle.register('oracle:', (function (context) {
-			var parameters = context.respondTo('parameters', [], context);
-			this.oracle = parameters.respondTo('at:', [1], context);
+		});
+		this.oracle.register('oracle:', function (selector, parameters, context) {
+			this.oracle = parameters[0];
 			return this;
-		}).bind(this));
+		});
 	},
 	respondTo: function (selector, parameters, context) {
-		context = context.respondTo('newContextExtending:selector:parameters:receiver:', [context, selector, parameters, this], context);
+		context = context.respondTo('newContextBelow:receivedBy:', [context, this], context);
 		context.respondTo('at:put:', ['this', this], context);
-		return this.oracle.respondTo(selector, parameters, context);
+		context.respondTo('at:put:', ['context', context], context);
+		return this.oracle.respondTo(selector, parameters, context, this);
 	}
 });
 
-meat.vm.model.Oracle = new Type(meat.vm.model.Object, {
-	intitialize: function (methods) {
-		this.base('initialize')();
+meat.vm.model.Oracle = new Type(Object, {
+	initialize: function (methods) {
 		if (methods === undefined) {
 			methods = {};
 		}
 		this.methods = methods;
 	},
-	respondTo: function (selector, parameters, context) {
-		var receiver = context.respondTo('receiver', [], context);
-		return this.methods[selector].apply(receiver, [context]);
+	respondTo: function (selector, parameters, context, receiver) {
+		return this.methods[selector].apply(receiver, [selector, parameters, context]);
 	},
 	register: function (selector, f) {
 		this.methods[selector] = f;
@@ -51,9 +48,9 @@ meat.vm.model.Oracle = new Type(meat.vm.model.Object, {
 });
 
 meat.vm.model.VariableOracle = new Type(meat.vm.model.Oracle, {
-	respondTo: function (selector, parameters, context) {
+	respondTo: function (selector, parameters, context, receiver) {
 		if (this.methods[selector] !== undefined) {
-			return this.base('respondTo')(selector, parameters, context);
+			return this.base('respondTo')(selector, parameters, context, receiver);
 		} else {
 			var variable = context.respondTo('at:', ['this'], context);
 			var object = variable.respondTo('object', [], context);
@@ -63,59 +60,41 @@ meat.vm.model.VariableOracle = new Type(meat.vm.model.Oracle, {
 });
 
 meat.vm.model.Variable = new Type(meat.vm.model.Object, {
-	intitialize: function () {
+	initialize: function () {
 		this.base('initialize')();
 		this.object = new meat.vm.model.Object();
 		this.oracle = new meat.vm.model.VariableOracle(this.oracle.getMethods());
-		this.oracle.register('object', (function (context) {
+		this.oracle.register('object', function (selector, parameters, context) {
 			return this.object;
-		}).bind(this));
-		this.oracle.register('object:', (function (context) {
-			var parameters = context.respondTo('parameters', [], context);
-			var object = parameters.respondTo('at:', [1], context);
+		});
+		this.oracle.register('object:', function (selector, parameters, context) {
+			var object = parameters[0];
 			this.object = object;
 			return this;
-		}).bind(this));
+		});
 	}
 });
 
 meat.vm.model.Context = new Type(meat.vm.model.Object, {
-	intitialize: function () {
+	initialize: function (parent, receiver) {
 		this.base('initialize')();
-		this.parent = new meat.vm.model.Object();
-		this.selector = new meat.vm.model.Object();
-		this.parameters = new meat.vm.model.Object();
-		this.receiver = new meat.vm.model.Object();
+		this.parent = parent;
+		this.receiver = receiver;
 		this.variables = {};
-		this.oracle.register('parent', (function (context) {
-			return this.parent;
+		// bind to this since we bypass recursion
+		this.oracle.register('newContextBelow:receivedBy:', (function (selector, parameters, context) {
+			return new meat.vm.model.Context(parameters[0], parameters[1]);
 		}).bind(this));
-		this.oracle.register('selector', (function (context) {
-			return this.selector;
+		this.oracle.register('newVariable', (function (selector, parameters, context) {
+			return new meat.vm.model.Variable();
 		}).bind(this));
-		this.oracle.register('parameters', (function (context) {
-			return this.parameters;
-		}).bind(this));
-		this.oracle.register('receiver', (function (context) {
-			return this.receiver;
-		}).bind(this));
-		this.oracle.register('newContextExtending:selector:parameters:receiver:', (function (context) {
-			var parameters = context.respondTo('parameters', [], context);
-			this.parent = parameters.respondTo('at:', [1], context);
-			this.selector = parameters.respondTo('at:', [2], context);
-			this.parameters = parameters.respondTo('at:', [3], context);
-			this.receiver = parameters.respondTo('at:', [4], context);
-			return this;
-		}).bind(this));
-		this.oracle.register('at:', (function (context) {
-			var parameters = context.respondTo('parameters', [], context);
-			var name = parameters.respondTo('at:', [1], context);
+		this.oracle.register('at:', (function (selector, parameters, context) {
+			var name = parameters[0];
 			return this.variables[name];
 		}).bind(this));
-		this.oracle.register('at:put:', (function (context) {
-			var parameters = context.respondTo('parameters', [], context);
-			var name = parameters.respondTo('at:', [1], context);
-			var object = parameters.respondTo('at:', [2], context);
+		this.oracle.register('at:put:', (function (selector, parameters, context) {
+			var name = parameters[0];
+			var object = parameters[1];
 			var variable = (this.variables[name] !== undefined)
 					? this.variables[name]
 					: context.respondTo('newVariable', [], context);
@@ -123,48 +102,61 @@ meat.vm.model.Context = new Type(meat.vm.model.Object, {
 			variable.respondTo('object:', [object], context);
 			return this;
 		}).bind(this));
+	},
+	respondTo: function (selector, parameters, context) {
+		// bypass recursion
+		return this.oracle.respondTo(selector, parameters, context, this.receiver);
 	}
 });
 
 meat.vm.model.Block = new Type(meat.vm.model.Object, {
-	intitialize: function (f) {
+	initialize: function (f) {
 		this.base('initialize')();
 		this.f = f;
-		this.oracle.register('runIn:', (function (context) {
-			return this.f.apply(this, [context]);
-		}).bind(this));
+		this.oracle.register('runIn:', function (selector, parameters, context) {
+			return this.f.apply(this, [selector, parameters, context]);
+		});
 	}
 });
 
 meat.vm.model.Character = new Type(meat.vm.model.Object, {
-	intitialize: function (character) {
+	initialize: function (character) {
 		this.base('initialize')();
 		this.character = character;
 	}
 });
 
 meat.vm.model.String = new Type(meat.vm.model.Object, {
-	intitialize: function (string) {
+	initialize: function (string) {
 		this.base('initialize')();
 		this.string = string;
 	}
 });
 
 meat.vm.model.Number = new Type(meat.vm.model.Object, {
-	intitialize: function (number) {
+	initialize: function (number) {
 		this.base('initialize')();
 		this.number = number;
+		this.oracle.register('+', function (selector, parameters, context) {
+			var summand = parameters[0];
+			return new meat.vm.model.Number(this.number + summand.number);
+		});
 	}
 });
 
 meat.vm.model.List = new Type(meat.vm.model.Object, {
-	intitialize: function (list) {
+	initialize: function (list) {
 		this.base('initialize')();
 		this.list = list;
-		this.oracle.register('at:', (function (context) {
-			var parameters = context.respondTo('parameters', [], context);
-			var index = parameters.respondTo('at:', [1], context);
+		this.oracle.register('at:', function (selector, parameters, context) {
+			var index = parameters[0];
 			return this.list[index];
-		}).bind(this));
+		});
+		this.oracle.register('at:put:', function (selector, parameters, context) {
+			var index = parameters[0];
+			var value = parameters[1];
+			this.list[index] = value;
+			return this;
+		});
 	}
 });

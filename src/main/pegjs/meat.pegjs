@@ -151,7 +151,7 @@ number
 		}
 	/ digits:[1-9][0-9]*
 		{
-			return new meat.ast.node.Number(parseInt(digits.join('')));
+			return new meat.ast.node.Number(parseInt(digits));
 		}
 
 list

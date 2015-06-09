@@ -15,15 +15,6 @@ module.exports = function(grunt) {
 					+ ' * licenced under MIT, see LICENSE.txt\n'
 					+ ' */\n'
 		},
-		peg: {
-			meat : {
-				src: '<%= meta.src.main %>/pegjs/meat.pegjs',
-				dest: '<%= meta.bin %>/parser.js',
-				options: {
-					exportVar: 'parser'
-				}
-			}
-		},
 		connect: {
 			example: {
 				options: {
@@ -32,11 +23,27 @@ module.exports = function(grunt) {
 					keepalive: true
 				}
 			}
+		},
+		watch: {
+			example: {
+				files: ['<%= meta.src.main %>/**/*'],
+				tasks: ['example'],
+			}
+		},
+		peg: {
+			meat : {
+				src: '<%= meta.src.main %>/pegjs/meat.pegjs',
+				dest: '<%= meta.bin %>/parser.js',
+				options: {
+					exportVar: 'parser'
+				}
+			}
 		}
 	});
 	
 	grunt.loadNpmTasks('grunt-contrib-connect');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-peg');
 	
-	grunt.registerTask('build-example', ['peg:meat', 'connect:example']);
+	grunt.registerTask('example', ['peg:meat', 'connect:example']);
 };

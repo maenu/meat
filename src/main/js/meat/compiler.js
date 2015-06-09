@@ -14,9 +14,10 @@ meat.compiler.Compiler = new Type(Object, {
 		this.source = '';
 	},
 	compile: function (ast) {
+		this.source = '';
 		var visitor = new meat.compiler.Visitor(this);
 		this.append('function () {\n');
-		this.append('var context = new meat.vm.model.Context();\n');
+		this.append('var context = new meat.vm.model.Context(null, null);\n');
 		ast.accept(visitor);
 		this.append('}\n');
 		return this.source;
@@ -45,17 +46,16 @@ meat.compiler.Visitor = new Type(meat.ast.visitor.DepthFirst, {
 		this.append(';\n');
 	},
 	visitComment: function (node) {
-		this.append('new meat.vm.model.Comment(new meat.vm.model.List([');
+		this.append('new meat.vm.model.Comment([');
 		var lines = node.getLines();
 		for (var i = 0; i < lines.length - 1; i = i + 1) {
-			this.append('new meat.vm.model.String(\'');
+			this.append('\'');
 			this.append(lines[i]);
-			this.append('\'), ');
+			this.append('\', ');
 		}
-		this.append('new meat.vm.model.String(\'');
+		this.append('\'');
 		this.append(lines[lines.length - 1]);
-		this.append('\')');
-		this.append(']))');
+		this.append('\'])');
 	},
 	visitMessageSend: function (node) {
 		this.append('(');
@@ -65,49 +65,52 @@ meat.compiler.Visitor = new Type(meat.ast.visitor.DepthFirst, {
 		this.append(')');
 	},
 	visitUnaryMessage: function (node) {
-		this.append('new meat.vm.model.String(\'' + node.selector + '\')');
-		this.append(', new meat.vm.model.List([]), context');
+		this.append('\'');
+		this.append(node.selector);
+		this.append('\', [], context');
 	},
 	visitBinaryMessage: function (node) {
-		this.append('new meat.vm.model.String(\'' + node.selector + '\')');
-		this.append(', new meat.vm.model.List([');
+		this.append('\'');
+		this.append(node.selector);
+		this.append('\', [');
 		this.base('visitBinaryMessage')(node);
-		this.append(']), context');
+		this.append('], context');
 	},
 	visitKeywordMessage: function (node) {
-		this.append('new meat.vm.model.String(\'' + node.selector + '\')');
-		this.append(', new meat.vm.model.List([');
+		this.append('\'');
+		this.append(node.selector);
+		this.append('\', [');
 		var parameters = node.getParameters();
 		for (var i = 0; i < parameters.length - 1; i = i + 1) {
 			parameters[i].accept(this);
 			this.append(', ');
 		}
 		parameters[parameters.length - 1].accept(this);
-		this.append(']), context');
+		this.append('], context');
 	},
 	visitVariable: function (node) {
-		this.append('context.respondTo(new meat.vm.model.String(\'at:\'), [new meat.vm.model.String(\'');
+		this.append('context.respondTo(\'at:\', [\'');
 		this.append(node.getName());
-		this.append('\')], context)');
+		this.append('\'], context)');
 	},
 	visitBlock: function (node) {
-		this.append('new meat.vm.model.Block(function (context) {\n');
+		this.append('new meat.vm.model.Block(function (selector, parameters, context) {\n');
 		this.base('visitBlock')(node);
 		this.append('})');
 	},
 	visitCharacter: function (node) {
 		this.append('new meat.vm.model.Character(\'');
-		this.source += node.character
+		this.append(node.character);
 		this.append('\')');
 	},
 	visitString: function (node) {
 		this.append('new meat.vm.model.String(\'');
-		this.source += node.string
+		this.append(node.string);
 		this.append('\')');
 	},
 	visitNumber: function (node) {
-		this.source += 'new meat.vm.model.Number('
-		this.source += node.getNumber()
+		this.append('new meat.vm.model.Number(');
+		this.append(node.getNumber());
 		this.append(')');
 	},
 	visitList: function (node) {

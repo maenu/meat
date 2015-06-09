@@ -15,14 +15,17 @@
 			.column {
 				position: absolute;
 				top: 0;
-				width: 50%;
+				width: 33.3%;
 				height: 100%;
 			}
 			#source {
 				left: 0;
 			}
 			#compiled {
-				right: 0;
+				left: 33.3%;
+			}
+			#evaluated {
+				left: 66.7%;
 			}
 			.code {
 				display: block;
@@ -56,8 +59,9 @@
 					var source = $(this).val();
 					var ast = parser.parse(source);
 					var compiled = compiler.compile(ast);
-					console.log(ast);
 					$('#compiled .code').val(compiled);
+					var evaluated = eval('(' + compiled + ')()');
+					$('#evaluated .code').val(evaluated);
 				});
 			});
 		</script>
@@ -72,6 +76,12 @@
 		<div id="compiled" class="column">
 			<h2>
 				Compiled
+			</h2>
+			<textarea class="code"></textarea>
+		</div>
+		<div id="evaluated" class="column">
+			<h2>
+				Evaluated
 			</h2>
 			<textarea class="code"></textarea>
 		</div>
