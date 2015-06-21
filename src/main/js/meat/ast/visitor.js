@@ -42,19 +42,10 @@ meat.ast.visitor.DepthFirst = new Type(Object, {
 	visitBlock: function (node) {
 		node.getStatements().accept(this);
 	},
-	visitCharacter: function (node) {
-		
-	},
 	visitString: function (node) {
 		
 	},
 	visitNumber: function (node) {
 		
-	},
-	visitList: function (node) {
-		var items = node.getItems();
-		for (var i = 0; i < items.length; i = i + 1) {
-			items[i].accept(this);
-		}
 	}
 });

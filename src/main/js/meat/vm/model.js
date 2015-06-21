@@ -119,13 +119,6 @@ meat.vm.model.Block = new Type(meat.vm.model.Object, {
 	}
 });
 
-meat.vm.model.Character = new Type(meat.vm.model.Object, {
-	initialize: function (character) {
-		this.base('initialize')();
-		this.character = character;
-	}
-});
-
 meat.vm.model.String = new Type(meat.vm.model.Object, {
 	initialize: function (string) {
 		this.base('initialize')();
@@ -140,23 +133,6 @@ meat.vm.model.Number = new Type(meat.vm.model.Object, {
 		this.oracle.register('+', function (selector, parameters, context) {
 			var summand = parameters[0];
 			return new meat.vm.model.Number(this.number + summand.number);
-		});
-	}
-});
-
-meat.vm.model.List = new Type(meat.vm.model.Object, {
-	initialize: function (list) {
-		this.base('initialize')();
-		this.list = list;
-		this.oracle.register('at:', function (selector, parameters, context) {
-			var index = parameters[0];
-			return this.list[index];
-		});
-		this.oracle.register('at:put:', function (selector, parameters, context) {
-			var index = parameters[0];
-			var value = parameters[1];
-			this.list[index] = value;
-			return this;
 		});
 	}
 });

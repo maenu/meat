@@ -92,9 +92,9 @@ message
 		}
 
 unary
-	= selector:[a-zA-Z]+
+	= selector:name
 		{
-			return selector.join('');
+			return selector;
 		}
 
 binary
@@ -104,23 +104,21 @@ binary
 		}
 
 keyword
-	= selector:[a-zA-Z]+ ':'
+	= selector:name ':'
 		{
-			return selector.join('') + ':';
+			return selector + ':';
 		}
 
 literal
 	= variable
 	/ block
-	/ character
 	/ string
 	/ number
-	/ list
 
 variable
-	= name:[a-zA-Z]+
+	= name:name
 		{
-			return new meat.ast.node.Variable(name.join(''));
+			return new meat.ast.node.Variable(name);
 		}
 
 block
@@ -130,12 +128,6 @@ block
 				throw new Error('bad indent');
 			}
 			return new meat.ast.node.Block(statements);
-		}
-
-character
-	= '$' character:.
-		{
-			return new meat.ast.node.Character(character);
 		}
 
 string
@@ -149,34 +141,13 @@ number
 		{
 			return new meat.ast.node.Number(0);
 		}
-	/ digits:[1-9][0-9]*
+	/ digits:([1-9][0-9]*)
 		{
-			return new meat.ast.node.Number(parseInt(digits));
+			return new meat.ast.node.Number(parseInt(digits.join('')));
 		}
 
-list
-	= '[]'
+name
+	= !'vegetable' name:([a-zA-Z]+([0-9]/[a-zA-Z])*)
 		{
-			return new meat.ast.node.List([]);
-		}
-	/ '[' items:
-		(
-			firstItem:expression nextItems:
-				(
-					' ' nextItem:expression
-						{
-							return nextExpression;
-						}
-				)*
-				{
-					var items = [firstItem];
-					for (var i = 0; i < nextItems.length; i = i + 1) {
-						items.push(nextItems[i]);
-					}
-					return items;
-				}
-		)
-		']'
-		{
-			return new meat.ast.node.List(items);
+			return name.join(''); 
 		}

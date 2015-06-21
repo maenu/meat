@@ -1,7 +1,7 @@
 "
-Turing machine implementation with meat.
-
-Adds one to a binary number.
+	Turing machine implementation with meat.
+	
+	Adds one to a binary number.
 "
 
 dictionary := (Dictionary new)
@@ -52,7 +52,9 @@ finishedStates := (Set new)
 finishedStates add: -1
 tape := (Tape from: '10010101001')
 transition := (Transition with: {
-	"move to lowest bit"
+	"
+		move to lowest bit
+	"
 	((state = 0) and: (symbol = 0)) ifTrue: {
 		(Translation to: 0 writing: 0 moving: 1)
 	}
@@ -62,7 +64,9 @@ transition := (Transition with: {
 	((state = 0) and: (symbol = blank)) ifTrue: {
 		(Translation to: 1 writing: blank moving: -1)
 	}
-	"add one"
+	"
+		add one
+	"
 	((state = 1) and: (symbol = 0)) ifTrue: {
 		(Translation to: 2 writing: 1 moving: -1)
 	}
@@ -72,7 +76,9 @@ transition := (Transition with: {
 	((state = 1) and: (symbol = blank)) ifTrue: {
 		(Translation to: -1 writing: 1 moving: 0)
 	}
-	"move to highest bit"
+	"
+		move to highest bit
+	"
 	((state = 2) and: (symbol = 0)) ifTrue: {
 		(Translation to: 2 writing: 0 moving: -1)
 	}

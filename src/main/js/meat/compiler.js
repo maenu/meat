@@ -98,11 +98,6 @@ meat.compiler.Visitor = new Type(meat.ast.visitor.DepthFirst, {
 		this.base('visitBlock')(node);
 		this.append('})');
 	},
-	visitCharacter: function (node) {
-		this.append('new meat.vm.model.Character(\'');
-		this.append(node.character);
-		this.append('\')');
-	},
 	visitString: function (node) {
 		this.append('new meat.vm.model.String(\'');
 		this.append(node.string);
@@ -112,15 +107,5 @@ meat.compiler.Visitor = new Type(meat.ast.visitor.DepthFirst, {
 		this.append('new meat.vm.model.Number(');
 		this.append(node.getNumber());
 		this.append(')');
-	},
-	visitList: function (node) {
-		this.append('new meat.vm.model.List([');
-		var items = node.getItems();
-		for (var i = 0; i < items.length - 1; i = i + 1) {
-			items[i].accept(this);
-			this.append(', ');
-		}
-		items[items.length - 1].accept(this);
-		this.append('])');
 	}
 });

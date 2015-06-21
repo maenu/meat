@@ -134,19 +134,6 @@ meat.ast.node.Block = new Type(meat.ast.node.AbstractLiteral, {
 	}
 });
 
-meat.ast.node.Character = new Type(meat.ast.node.AbstractLiteral, {
-	initialize: function (character) {
-		this.base('initialize')();
-		this.character = character;
-	},
-	accept: function (visitor) {
-		visitor.visitCharacter(this);
-	},
-	getCharacter: function () {
-		return this.character;
-	}
-});
-
 meat.ast.node.String = new Type(meat.ast.node.AbstractLiteral, {
 	initialize: function (string) {
 		this.base('initialize')();
@@ -170,18 +157,5 @@ meat.ast.node.Number = new Type(meat.ast.node.AbstractLiteral, {
 	},
 	getNumber: function () {
 		return this.number;
-	}
-});
-
-meat.ast.node.List = new Type(meat.ast.node.AbstractLiteral, {
-	initialize: function (items) {
-		this.base('initialize')();
-		this.items = items;
-	},
-	accept: function (visitor) {
-		visitor.visitList(this);
-	},
-	getItems: function () {
-		return this.items;
 	}
 });
