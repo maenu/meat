@@ -27,7 +27,7 @@ module.exports = function(grunt) {
 		watch: {
 			example: {
 				files: ['<%= meta.src.main %>/**/*'],
-				tasks: ['example'],
+				tasks: ['peg:meat', 'connect:example'],
 			}
 		},
 		peg: {
@@ -40,10 +40,7 @@ module.exports = function(grunt) {
 			}
 		}
 	});
-	
 	grunt.loadNpmTasks('grunt-contrib-connect');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-peg');
-	
-	grunt.registerTask('example', ['peg:meat', 'connect:example']);
 };

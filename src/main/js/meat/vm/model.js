@@ -86,6 +86,10 @@ meat.vm.model.Context = new Type(meat.vm.model.Object, {
 		}).bind(this));
 		this.oracle.register('at:', (function (selector, parameters, context) {
 			var name = parameters[0];
+			var variable = (this.variables[name] !== undefined)
+					? this.variables[name]
+					: context.respondTo('newVariable', [], context);
+			this.variables[name] = variable;
 			return this.variables[name];
 		}).bind(this));
 		this.oracle.register('at:put:', (function (selector, parameters, context) {

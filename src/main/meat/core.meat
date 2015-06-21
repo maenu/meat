@@ -1,8 +1,10 @@
-context oracle: {
+context oracle: ({
 	context at: 'oracleContext' put: (Context new)
 	(context at: 'oracleContext') at: 'oldOracle' put: (context oracle)
 	{
-		"available in oracle context: selector arguments sender receiver"
+		"
+			available in oracle context: selector arguments sender receiver
+		"
 		((context at: 'selector') = 'send:with:in:to:') ifTrue: {
 			(((context at: 'arguments') at: 1) = ':=') ifTrue: {
 				((context at: 'arguments') at: 4) value: (((context at: 'arguments') at: 2) at: 1)
@@ -13,16 +15,14 @@ context oracle: {
 			(context at: 'oldOracle') runIn: context
 		}
 	} in: (context at: 'oracleContext')
-} run
-
+} run)
 "
-unresolved message sends:
+	unresolved message sends:
 	=
 	ifTrue:ifFalse:
 	Context>>new
 	self
 "
-
 context at: 'Variable' put: .
 Variable oracle: {
 	(selector = 'name:value:') ifTrue: {
@@ -45,7 +45,9 @@ Variable oracle: {
 						(selector = 'value') ifTrue: {
 							context at: 'value'
 						} ifFalse: {
-							"should raise error"
+							"
+								should raise error
+							"
 						}
 					}
 				}
