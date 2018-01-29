@@ -14,5 +14,9 @@
   },
   "dependencies": {
     "pegjs": "^0.10.0"
+  },
+  "scripts": {
+    "test": "mocha --recursive src/test/nodejs",
+    "test-debug": "mocha --inspect --inspect-brk --recursive src/test/nodejs"
   }
 }

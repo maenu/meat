@@ -5,6 +5,7 @@
  */
 
 {
+    var node = require('../../../../src/main/nodejs/ast/node');
 	var expectedIndentation = 0;
 	var checkIndentation = function (actualIndentation) {
 		if (actualIndentation != expectedIndentation) {
@@ -23,18 +24,20 @@ statements
 				}
 		)+
 		{
-			return new meat.ast.node.Statements(statements);
+			return new node.Statements(statements);
 		}
 
 indent
-	= {
-		expectedIndentation = expectedIndentation + 1;
-	}
+	= ''
+        {
+            expectedIndentation = expectedIndentation + 1;
+        }
 
 dedent
-	= {
-		expectedIndentation = expectedIndentation - 1;
-	}
+	= ''
+        {
+            expectedIndentation = expectedIndentation - 1;
+        }
 
 statement
 	= comment
@@ -44,7 +47,7 @@ comment
 	= '"\n' indent commentLines:commentLine+ dedent actualIndentations:'\t'* '"'
 		{
 			checkIndentation(actualIndentations.length);
-			return new meat.ast.node.Comment(commentLines);
+			return new node.Comment(commentLines);
 		}
 
 commentLine
@@ -57,7 +60,7 @@ commentLine
 messageSend
 	= receiver:expression message:message
 		{
-			return new meat.ast.node.MessageSend(receiver, message);
+			return new node.MessageSend(receiver, message);
 		}
 
 expression
@@ -79,15 +82,15 @@ message
 				selector.push(pairs[i][0]);
 				parameters.push(pairs[i][1]);
 			}
-			return new meat.ast.node.KeywordMessage(selector.join(''), parameters);
+			return new node.KeywordMessage(selector.join(''), parameters);
 		}
 	/ ' ' selector:binary ' ' parameter:expression
 		{
-			return new meat.ast.node.BinaryMessage(selector, parameter);
+			return new node.BinaryMessage(selector, parameter);
 		}
 	/ ' ' selector:unary
 		{
-			return new meat.ast.node.UnaryMessage(selector);
+			return new node.UnaryMessage(selector);
 		}
 
 unary
@@ -117,30 +120,30 @@ literal
 variable
 	= name:name
 		{
-			return new meat.ast.node.Variable(name);
+			return new node.Variable(name);
 		}
 
 block
 	= '{\n' indent statements:statements dedent actualIndentations:'\t'* '}'
 		{
 			checkIndentation(actualIndentations.length);
-			return new meat.ast.node.Block(statements);
+			return new node.Block(statements);
 		}
 
 string
 	= '\'' string:[^']* '\''
 		{
-			return new meat.ast.node.String(string.join(''));
+			return new node.String(string.join(''));
 		}
 
 number
 	= '0'
 		{
-			return new meat.ast.node.Number(0);
+			return new node.Number(0);
 		}
 	/ digits:([1-9][0-9]*)
 		{
-			return new meat.ast.node.Number(parseInt(digits.join('')));
+			return new node.Number(parseInt(digits.join('')));
 		}
 
 name
