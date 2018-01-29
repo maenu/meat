@@ -103,9 +103,9 @@ class Literal extends Node {
 
 class Variable extends Literal {
 
-	constructor(name) {
+	constructor(identifier) {
 		super()
-		this.name = name
+		this.identifier = identifier
 	}
 
 	accept(visitor) {

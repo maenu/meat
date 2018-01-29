@@ -93,7 +93,7 @@ class Visitor extends visitor.DepthFirst {
 
 	visitVariable(node) {
 		this.append('context.respondTo(\'at:\', [\'')
-		this.append(node.name)
+		this.append(node.identifier)
 		this.append('\'], context)')
 	}
 

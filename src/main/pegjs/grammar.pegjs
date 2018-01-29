@@ -14,18 +14,8 @@
 	};
 }
 
-statements
-	= statements:
-		(
-			actualIndentations:'\t'* statement:statement '\n'
-				{
-					checkIndentation(actualIndentations.length);
-					return statement;
-				}
-		)+
-		{
-			return new node.Statements(statements);
-		}
+goal
+    = statements
 
 indent
 	= ''
@@ -38,6 +28,19 @@ dedent
         {
             expectedIndentation = expectedIndentation - 1;
         }
+
+statements
+	= statements:
+		(
+			actualIndentations:'\t'* statement:statement '\n'
+				{
+					checkIndentation(actualIndentations.length);
+					return statement;
+				}
+		)+
+		{
+			return new node.Statements(statements);
+		}
 
 statement
 	= comment
@@ -94,7 +97,7 @@ message
 		}
 
 unary
-	= selector:name
+	= selector:identifier
 		{
 			return selector;
 		}
@@ -106,7 +109,7 @@ binary
 		}
 
 keyword
-	= selector:name ':'
+	= selector:identifier ':'
 		{
 			return selector + ':';
 		}
@@ -118,16 +121,22 @@ literal
 	/ number
 
 variable
-	= name:name
+	= identifier:identifier
 		{
-			return new node.Variable(name);
+			return new node.Variable(identifier);
 		}
 
 block
-	= '{\n' indent statements:statements dedent actualIndentations:'\t'* '}'
+	= '{' statements:('\n' indent statements:statements dedent actualIndentations:'\t'*
+        {
+            checkIndentation(actualIndentations.length);
+            return statements;
+        })? '}'
 		{
-			checkIndentation(actualIndentations.length);
-			return new node.Block(statements);
+		    if (typeof statements !== 'undefined') {
+			    return new node.Block(statements);
+		    }
+		    return new node.Block([]);
 		}
 
 string
@@ -137,17 +146,13 @@ string
 		}
 
 number
-	= '0'
+    = ('0' / ([1-9] [0-9]*)) ('.' [0-9]+)?
 		{
-			return new node.Number(0);
-		}
-	/ digits:([1-9][0-9]*)
-		{
-			return new node.Number(parseInt(digits.join('')));
+			return new node.Number(parseFloat(text()));
 		}
 
-name
-	= !'vegetable' name:([a-zA-Z]+([0-9]/[a-zA-Z])*)
+identifier
+	= !'vegetable' identifier:([a-zA-Z]+([0-9]/[a-zA-Z])*)
 		{
-			return name[0].join('') + name[1].join(''); 
+			return identifier[0].join('') + identifier[1].join('');
 		}
