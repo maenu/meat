@@ -133,10 +133,10 @@ block
             return statements;
         })? '}'
 		{
-		    if (typeof statements !== 'undefined') {
+		    if (statements) {
 			    return new node.Block(statements);
 		    }
-		    return new node.Block([]);
+		    return new node.Block(new node.Statements([]));
 		}
 
 string

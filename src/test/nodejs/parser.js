@@ -85,6 +85,7 @@ describe('parser', () => {
 				})
 			}
 
+			parses('{}', 0)
 			parses('{\n\t1 negative\n}', 1)
 			parses('{\n\t1 negative\n\t2 positive\n}', 2)
 			doesNotParse('{')
