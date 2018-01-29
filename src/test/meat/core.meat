@@ -11,7 +11,7 @@ context oracle: ({
 			} ifFalse: {
 				((context at: 'arguments') at: 4) receive: ((context at: 'arguments') at: 1) with: ((context at: 'arguments') at: 2) in: ((context at: 'arguments') at: 3)
 			}
-		} ifFalse {
+		} ifFalse: {
 			(context at: 'oldOracle') runIn: context
 		}
 	} in: (context at: 'oracleContext')

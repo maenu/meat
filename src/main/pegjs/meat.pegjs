@@ -5,17 +5,20 @@
  */
 
 {
-	var expectedIndent = 0;
+	var expectedIndentation = 0;
+	var checkIndentation = function (actualIndentation) {
+		if (actualIndentation != expectedIndentation) {
+			throw new Error('bad indent');
+		}
+	};
 }
 
 statements
 	= statements:
 		(
-			indent:'\t'* statement:statement '\n'
+			actualIndentations:'\t'* statement:statement '\n'
 				{
-					if (indent.length != expectedIndent) {
-						throw new Error('bad indent');
-					}
+					checkIndentation(actualIndentations.length);
 					return statement;
 				}
 		)+
@@ -25,12 +28,12 @@ statements
 
 indent
 	= {
-		expectedIndent = expectedIndent + 1;
+		expectedIndentation = expectedIndentation + 1;
 	}
 
 dedent
 	= {
-		expectedIndent = expectedIndent - 1;
+		expectedIndentation = expectedIndentation - 1;
 	}
 
 statement
@@ -38,20 +41,16 @@ statement
 	/ messageSend
 
 comment
-	= '"\n' indent commentLines:commentLine+ dedent indent:'\t'* '"'
+	= '"\n' indent commentLines:commentLine+ dedent actualIndentations:'\t'* '"'
 		{
-			if (indent.length != expectedIndent) {
-				throw new Error('bad indent');
-			}
+			checkIndentation(actualIndentations.length);
 			return new meat.ast.node.Comment(commentLines);
 		}
 
 commentLine
-	= indent:'\t'* characters:[^"\n]* '\n'
+	= actualIndentations:'\t'* characters:[^"\n]* '\n'
 		{
-			if (indent.length != expectedIndent) {
-				throw new Error('bad indent');
-			}
+			checkIndentation(actualIndentations.length);
 			return characters.join('');
 		}
 
@@ -122,11 +121,9 @@ variable
 		}
 
 block
-	= '{\n' indent statements:statements dedent indent:'\t'* '}'
+	= '{\n' indent statements:statements dedent actualIndentations:'\t'* '}'
 		{
-			if (indent.length != expectedIndent) {
-				throw new Error('bad indent');
-			}
+			checkIndentation(actualIndentations.length);
 			return new meat.ast.node.Block(statements);
 		}
 
@@ -149,5 +146,5 @@ number
 name
 	= !'vegetable' name:([a-zA-Z]+([0-9]/[a-zA-Z])*)
 		{
-			return name.join(''); 
+			return name[0].join('') + name[1].join(''); 
 		}
