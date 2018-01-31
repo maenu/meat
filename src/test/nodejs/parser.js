@@ -9,6 +9,7 @@ describe('parser', () => {
 	before(() => {
 		p = new parser.Parser({
 			allowedStartRules: [
+				'goal',
 				'statements',
 				'statement',
 				'comment',
@@ -26,6 +27,143 @@ describe('parser', () => {
 				'identifier'
 			]
 		})
+	})
+
+	describe('goal', () => {
+
+		let parses = (text) => {
+			it('parses ' + text, () => {
+				let n = p.parse(text)
+				assert.ok(n instanceof node.Statements)
+			})
+		}
+		let doesNotParse = (text) => {
+			it('does not parse ' + text, () => {
+				assert.throws(() => {
+					p.parse(text)
+				}, 'SyntaxError')
+			})
+		}
+
+		parses(`"
+	This is a fibonacci program.
+"
+f := {
+	(i <= 1) ifTrue: {
+		1
+	} ifFalse: {
+		(f run: (i - 2)) + (f run: (i - 1))
+	}
+}
+`)
+
+	})
+
+	describe('message', () => {
+
+		describe('unary', () => {
+
+			let parses = (text) => {
+				it('parses ' + text, () => {
+					let n = p.parse(text, {
+						startRule: 'message'
+					})
+					assert.ok(n instanceof node.UnaryMessage)
+					assert.equal(n.selector, text.substring(1))
+				})
+			}
+			let doesNotParse = (text) => {
+				it('does not parse ' + text, () => {
+					assert.throws(() => {
+						p.parse(text, {
+							startRule: 'message'
+						})
+					}, 'SyntaxError')
+				})
+			}
+
+			parses(' a')
+			parses(' a1')
+			parses(' asdf')
+			parses(' asdf123')
+			parses(' asGECsddd345sd2t4x')
+			doesNotParse(' 0')
+			doesNotParse(' a ')
+			doesNotParse(' vegetable')
+			doesNotParse(' ä')
+			doesNotParse(' ')
+
+		})
+
+		describe('binary', () => {
+
+			let parses = (text) => {
+				it('parses ' + text, () => {
+					let n = p.parse(text, {
+						startRule: 'message'
+					})
+					assert.ok(n instanceof node.BinaryMessage)
+					assert.equal(n.selector, text.split(' ')[1])
+					assert.ok(n.parameter instanceof node.Number)
+					assert.equal(n.parameter.number, 1)
+				})
+			}
+			let doesNotParse = (text) => {
+				it('does not parse ' + text, () => {
+					assert.throws(() => {
+						p.parse(text, {
+							startRule: 'message'
+						})
+					}, 'SyntaxError')
+				})
+			}
+
+			parses(' + 1')
+			parses(' +- 1')
+			parses(' +*/<>:=.- 1')
+			doesNotParse(' 0 1')
+			doesNotParse(' a 1')
+			doesNotParse(' + 1 ')
+
+		})
+
+		describe('keyword', () => {
+
+			let parses = (text) => {
+				it('parses ' + text, () => {
+					let n = p.parse(text, {
+						startRule: 'message'
+					})
+					assert.ok(n instanceof node.KeywordMessage)
+					assert.equal(n.selector, text.replace(/ 1/g, '').replace(/ /g, ''))
+					assert.equal(n.parameters.length, n.selector.split(':').length - 1)
+					n.parameters.forEach((parameter) => {
+						assert.ok(parameter instanceof node.Number)
+						assert.equal(parameter.number, 1)
+					})
+				})
+			}
+			let doesNotParse = (text) => {
+				it('does not parse ' + text, () => {
+					assert.throws(() => {
+						p.parse(text, {
+							startRule: 'message'
+						})
+					}, 'SyntaxError')
+				})
+			}
+
+			parses(' a: 1')
+			parses(' a1: 1')
+			parses(' asdf: 1')
+			parses(' asdf123: 1')
+			parses(' asGECsddd345sd2t4x: 1 ajlhakljsdhfSDV2: 1')
+			doesNotParse(' a:')
+			doesNotParse(' a: 1 ')
+			doesNotParse(' ä: 1')
+
+		})
+
 	})
 
 	describe('literal', () => {

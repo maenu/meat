@@ -51,6 +51,10 @@ class DepthFirst {
 
 	}
 
+	visitList(node) {
+
+	}
+
 }
 
 module.exports = {

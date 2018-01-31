@@ -4,6 +4,8 @@
  * @author Manuel Leuenberger
  */
 
+// FIXME adapt to new model
+
 const visitor = require('./ast/visitor')
 
 class Compiler {
@@ -113,6 +115,10 @@ class Visitor extends visitor.DepthFirst {
 		this.append('new model.MeatNumber(')
 		this.append(node.number)
 		this.append(')')
+	}
+
+	visitList(node) {
+		this.append('new model.MeatList()')
 	}
 
 }

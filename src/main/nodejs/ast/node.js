@@ -153,6 +153,14 @@ class Number extends Literal {
 
 }
 
+class List extends Literal {
+
+	accept(visitor) {
+		visitor.visitList(this)
+	}
+
+}
+
 module.exports = {
 	Node: Node,
 	Statements: Statements,
@@ -167,5 +175,6 @@ module.exports = {
 	Variable: Variable,
 	Block: Block,
 	String: String,
-	Number: Number
+	Number: Number,
+	List: List
 }

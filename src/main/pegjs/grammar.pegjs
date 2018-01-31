@@ -45,6 +45,7 @@ statements
 statement
 	= comment
 	/ messageSend
+	/ literal
 
 comment
 	= '"\n' indent commentLines:commentLine+ dedent actualIndentations:'\t'* '"'
@@ -119,6 +120,7 @@ literal
 	/ block
 	/ string
 	/ number
+	/ list
 
 variable
 	= identifier:identifier
@@ -149,6 +151,12 @@ number
     = ('0' / ([1-9] [0-9]*)) ('.' [0-9]+)?
 		{
 			return new node.Number(parseFloat(text()));
+		}
+
+list
+	= '[]'
+		{
+		    return new node.List();
 		}
 
 identifier
