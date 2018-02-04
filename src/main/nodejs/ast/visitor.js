@@ -56,7 +56,7 @@ class DepthFirst {
 	}
 
 	visitList(node) {
-
+		node.statements.accept(this)
 	}
 
 }

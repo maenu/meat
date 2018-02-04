@@ -43,7 +43,6 @@ class Visitor extends visitor.DepthFirst {
 		}
 		this.append('return ')
 		node.statements[node.statements.length - 1].accept(this)
-		this.append(';\n')
 	}
 
 	visitComment(node) {
@@ -114,7 +113,7 @@ class Visitor extends visitor.DepthFirst {
 		}).join(', '))
 		this.append('], function (parameters, context) {\n')
 		super.visitBlock(node)
-		this.append('})')
+		this.append('\n})')
 	}
 
 	visitString(node) {
@@ -136,7 +135,13 @@ class Visitor extends visitor.DepthFirst {
 	}
 
 	visitList(node) {
-		this.append('new model.MeatList(new model.MeatOracle())')
+		this.append('new model.MeatList(new model.MeatOracle(), [\n')
+		for (let i = 0; i < node.statements.statements.length - 1; i = i + 1) {
+			node.statements.statements[i].accept(this)
+			this.append(',\n')
+		}
+		node.statements.statements[node.statements.statements.length - 1].accept(this)
+		this.append('\n])')
 	}
 
 }

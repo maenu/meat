@@ -169,6 +169,11 @@ class Boolean extends Literal {
 
 class List extends Literal {
 
+	constructor(statements) {
+		super()
+		this.statements = statements
+	}
+
 	accept(visitor) {
 		visitor.visitList(this)
 	}

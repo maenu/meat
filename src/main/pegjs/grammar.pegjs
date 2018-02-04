@@ -172,9 +172,16 @@ number
 		}
 
 list
-	= '{}'
+	= '{' statements:('\n' indent statements:statements dedent actualIndentations:'\t'*
+        {
+            checkIndentation(actualIndentations.length);
+            return statements;
+        })? ']'
 		{
-		    return new node.List();
+		    if (statements) {
+			    return new node.List(statements);
+		    }
+		    return new node.Block(new node.Statements([]));
 		}
 
 boolean
