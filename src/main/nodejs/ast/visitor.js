@@ -51,6 +51,10 @@ class DepthFirst {
 
 	}
 
+	visitBoolean(node) {
+
+	}
+
 	visitList(node) {
 
 	}

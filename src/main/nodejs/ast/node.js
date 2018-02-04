@@ -116,8 +116,9 @@ class Variable extends Literal {
 
 class Block extends Literal {
 
-	constructor(statements) {
+	constructor(parameters, statements) {
 		super()
+		this.parameters = parameters
 		this.statements = statements
 	}
 
@@ -153,6 +154,19 @@ class Number extends Literal {
 
 }
 
+class Boolean extends Literal {
+
+	constructor(boolean) {
+		super()
+		this.boolean = boolean
+	}
+
+	accept(visitor) {
+		visitor.visitBoolean(this)
+	}
+
+}
+
 class List extends Literal {
 
 	accept(visitor) {
@@ -172,6 +186,7 @@ module.exports = {
 	BinaryMessage: BinaryMessage,
 	KeywordMessage: KeywordMessage,
 	Literal: Literal,
+	Boolean: Boolean,
 	Variable: Variable,
 	Block: Block,
 	String: String,

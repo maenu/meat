@@ -69,7 +69,10 @@ messageSend
 
 expression
 	= literal
-	/ '(' messageSend ')'
+	/ '(' messageSend:messageSend ')'
+	    {
+	        return messageSend;
+	    }
 
 message
 	= pairs:
@@ -116,11 +119,12 @@ keyword
 		}
 
 literal
-	= variable
-	/ block
+	= boolean
 	/ string
 	/ number
 	/ list
+	/ variable
+	/ block
 
 variable
 	= identifier:identifier
@@ -129,17 +133,31 @@ variable
 		}
 
 block
-	= '{' statements:('\n' indent statements:statements dedent actualIndentations:'\t'*
+	= '[' parameters:(' ' parameter:identifier
+        {
+            return parameter;
+        })* statements:('\n' indent statements:statements dedent actualIndentations:'\t'*
         {
             checkIndentation(actualIndentations.length);
             return statements;
-        })? '}'
+        })? ']'
 		{
 		    if (statements) {
-			    return new node.Block(statements);
+			    return new node.Block(parameters, statements);
 		    }
-		    return new node.Block(new node.Statements([]));
+		    return new node.Block(parameters, new node.Statements([]));
 		}
+
+parameters
+    = parameter:identifier parameters:(' ' parameters:parameters
+        {
+            return parameters;
+        })?
+        {
+            parameters = parameters || []
+            parameters.unshift(parameter)
+            return parameters
+        }
 
 string
 	= '\'' string:[^']* '\''
@@ -154,9 +172,16 @@ number
 		}
 
 list
-	= '[]'
+	= '{}'
 		{
 		    return new node.List();
+		}
+
+boolean
+	= 'true'
+	/ 'false'
+		{
+		    return new node.Boolean(text() == 'true');
 		}
 
 identifier

@@ -4,8 +4,6 @@
  * @author Manuel Leuenberger
  */
 
-// FIXME adapt to new model
-
 const visitor = require('./ast/visitor')
 
 class Compiler {
@@ -14,7 +12,8 @@ class Compiler {
 		this.source = ''
 		let visitor = new Visitor(this)
 		this.append('function () {\n')
-		this.append('let context = new model.MeatContext(null, null);\n')
+		this.append('let context = new model.MeatContext(new model.MeatOracle(), this);\n')
+		this.append('context.variables[\'self\'] = context;\n')
 		ast.accept(visitor)
 		this.append('}\n')
 		return this.source
@@ -48,7 +47,7 @@ class Visitor extends visitor.DepthFirst {
 	}
 
 	visitComment(node) {
-		this.append('new model.MeatComment([')
+		this.append('new model.MeatComment(new model.MeatOracle(), [')
 		for (let i = 0; i < node.lines.length - 1; i = i + 1) {
 			this.append('\'')
 			this.append(node.lines[i])
@@ -60,11 +59,20 @@ class Visitor extends visitor.DepthFirst {
 	}
 
 	visitMessageSend(node) {
-		this.append('(')
-		node.receiver.accept(this)
-		this.append(').respondTo(')
-		node.message.accept(this)
-		this.append(')')
+		// FIXME this is broken, should be handled by context
+		if (node.message.selector == ':=') {
+			this.append('context.respondTo(\'at:put:\', [new model.MeatString(new model.MeatOracle(), \'')
+			this.append(node.receiver.identifier)
+			this.append('\'), ')
+			node.message.parameter.accept(this)
+			this.append('], context)')
+		} else {
+			this.append('(')
+			node.receiver.accept(this)
+			this.append(').respondTo(')
+			node.message.accept(this)
+			this.append(')')
+		}
 	}
 
 	visitUnaryMessage(node) {
@@ -94,31 +102,41 @@ class Visitor extends visitor.DepthFirst {
 	}
 
 	visitVariable(node) {
-		this.append('context.respondTo(\'at:\', [\'')
+		this.append('context.respondTo(\'at:\', [new model.MeatString(new model.MeatOracle(), \'')
 		this.append(node.identifier)
-		this.append('\'], context)')
+		this.append('\')], context)')
 	}
 
 	visitBlock(node) {
-		this.append('new model.MeatBlock(function (selector, parameters, context) {\n')
+		this.append('new model.MeatBlock(new model.MeatOracle(), [')
+		this.append(node.parameters.map((parameter) => {
+			return `'${parameter}'`
+		}).join(', '))
+		this.append('], function (parameters, context) {\n')
 		super.visitBlock(node)
 		this.append('})')
 	}
 
 	visitString(node) {
-		this.append('new model.MeatString(\'')
+		this.append('new model.MeatString(new model.MeatOracle(), \'')
 		this.append(node.string)
 		this.append('\')')
 	}
 
 	visitNumber(node) {
-		this.append('new model.MeatNumber(')
+		this.append('new model.MeatNumber(new model.MeatOracle(), ')
 		this.append(node.number)
 		this.append(')')
 	}
 
+	visitBoolean(node) {
+		this.append('new model.MeatBoolean(new model.MeatOracle(), ')
+		this.append(node.boolean)
+		this.append(')')
+	}
+
 	visitList(node) {
-		this.append('new model.MeatList()')
+		this.append('new model.MeatList(new model.MeatOracle())')
 	}
 
 }
