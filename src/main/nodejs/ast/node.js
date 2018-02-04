@@ -1,9 +1,3 @@
-/**
- * AST nodes for meat.
- *
- * @author Manuel Leuenberger
- */
-
 class Node {
 
 	accept(visitor) {

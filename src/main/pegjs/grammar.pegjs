@@ -1,9 +1,3 @@
-/**
- * Grammar for meat.
- * 
- * @author Manuel Leuenberger
- */
-
 {
     var node = require('../../../../src/main/nodejs/ast/node');
 	var expectedIndentation = 0;

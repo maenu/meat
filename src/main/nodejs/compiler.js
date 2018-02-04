@@ -1,9 +1,3 @@
-/**
- * JavaScript compiler for meat.
- *
- * @author Manuel Leuenberger
- */
-
 const visitor = require('./ast/visitor')
 
 class Compiler {

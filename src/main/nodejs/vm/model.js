@@ -1,9 +1,3 @@
-/**
- * JavaScript virtual machine model for meat.
- *
- * @author Manuel Leuenberger
- */
-
 class MeatObject {
 
 	constructor(oracle) {
@@ -26,7 +20,7 @@ class MeatObject {
 	}
 
 	respondTo(selector, parameters, context) {
-		console.log(this.constructor.name, selector, parameters.toString())
+		// console.log(this.constructor.name, selector, parameters.toString())
 		return this.oracle.respondTo(selector, parameters, context)
 	}
 
@@ -62,7 +56,7 @@ class MeatOracle extends MeatObject {
 	}
 
 	respondTo(selector, parameters, context) {
-		console.log(this.constructor.name, selector, parameters.toString())
+		// console.log(this.constructor.name, selector, parameters.toString())
 		if (this.oracle === this) {
 			let self = context.respondTo('at:', new MeatList(new MeatOracle(), [
 				new MeatString(new MeatOracle(), 'self')
@@ -141,7 +135,7 @@ class MeatContext extends MeatObject {
 	}
 
 	respondTo(selector, parameters, context) {
-		console.log(this.constructor.name, selector, parameters.toString())
+		// console.log(this.constructor.name, selector, parameters.toString())
 		// FIXME can we get rid of this?
 		if (selector == 'at:' && parameters.items[0].string == 'self') {
 			return this.variables['self']
@@ -211,7 +205,7 @@ class MeatVariable extends MeatObject {
 	}
 
 	respondTo(selector, parameters, context) {
-		console.log(this.constructor.name, selector, parameters.toString())
+		// console.log(this.constructor.name, selector, parameters.toString())
 		if (this.object.respondTo('respondsTo:', new MeatList(new MeatOracle(), [
 				new MeatString(new MeatOracle(), selector)
 			]), context).boolean) {

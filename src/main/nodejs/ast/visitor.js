@@ -1,9 +1,3 @@
-/**
- * AST visitor for meat.
- *
- * @author Manuel Leuenberger
- */
-
 class DepthFirst {
 
 	visitStatements(node) {
