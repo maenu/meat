@@ -58,20 +58,11 @@ class Visitor extends visitor.DepthFirst {
 	}
 
 	visitMessageSend(node) {
-		// FIXME this is broken, should be handled by context
-		if (node.message.selector == ':=') {
-			this.append('context.respondTo(\'at:put:\', new model.MeatList(new model.MeatOracle(), [new model.MeatString(new model.MeatOracle(), \'')
-			this.append(node.receiver.identifier)
-			this.append('\'), ')
-			node.message.parameter.accept(this)
-			this.append(']), context)')
-		} else {
-			this.append('(')
-			node.receiver.accept(this)
-			this.append(').respondTo(')
-			node.message.accept(this)
-			this.append(')')
-		}
+		this.append('(')
+		node.receiver.accept(this)
+		this.append(').respondTo(')
+		node.message.accept(this)
+		this.append(')')
 	}
 
 	visitUnaryMessage(node) {
