@@ -60,11 +60,11 @@ class Visitor extends visitor.DepthFirst {
 	visitMessageSend(node) {
 		// FIXME this is broken, should be handled by context
 		if (node.message.selector == ':=') {
-			this.append('context.respondTo(\'at:put:\', [new model.MeatString(new model.MeatOracle(), \'')
+			this.append('context.respondTo(\'at:put:\', new model.MeatList(new model.MeatOracle(), [new model.MeatString(new model.MeatOracle(), \'')
 			this.append(node.receiver.identifier)
 			this.append('\'), ')
 			node.message.parameter.accept(this)
-			this.append('], context)')
+			this.append(']), context)')
 		} else {
 			this.append('(')
 			node.receiver.accept(this)
@@ -77,33 +77,33 @@ class Visitor extends visitor.DepthFirst {
 	visitUnaryMessage(node) {
 		this.append('\'')
 		this.append(node.selector)
-		this.append('\', [], context')
+		this.append('\', new model.MeatList(new model.MeatOracle(), []), context')
 	}
 
 	visitBinaryMessage(node) {
 		this.append('\'')
 		this.append(node.selector)
-		this.append('\', [')
+		this.append('\', new model.MeatList(new model.MeatOracle(), [')
 		super.visitBinaryMessage(node)
-		this.append('], context')
+		this.append(']), context')
 	}
 
 	visitKeywordMessage(node) {
 		this.append('\'')
 		this.append(node.selector)
-		this.append('\', [')
+		this.append('\', new model.MeatList(new model.MeatOracle(), [')
 		for (let i = 0; i < node.parameters.length - 1; i = i + 1) {
 			node.parameters[i].accept(this)
 			this.append(', ')
 		}
 		node.parameters[node.parameters.length - 1].accept(this)
-		this.append('], context')
+		this.append(']), context')
 	}
 
 	visitVariable(node) {
-		this.append('context.respondTo(\'at:\', [new model.MeatString(new model.MeatOracle(), \'')
+		this.append('context.respondTo(\'at:\', new model.MeatList(new model.MeatOracle(), [new model.MeatString(new model.MeatOracle(), \'')
 		this.append(node.identifier)
-		this.append('\')], context)')
+		this.append('\')]), context)')
 	}
 
 	visitBlock(node) {

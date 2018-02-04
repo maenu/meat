@@ -12,14 +12,20 @@ class MeatObject {
 			return this.oracle
 		}
 		this.oracle.methods['oracle:'] = (parameters, context) => {
-			this.oracle = parameters[0]
+			this.oracle = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context)
 			return this
 		}
 	}
 
 	respondTo(selector, parameters, context) {
-		//console.log(this.constructor.name, selector, parameters, context.variables)
+		console.log(this.constructor.name, selector, parameters.toString())
 		return this.oracle.respondTo(selector, parameters, context)
+	}
+
+	toString() {
+		return '@Object'
 	}
 
 }
@@ -36,17 +42,26 @@ class MeatOracle extends MeatObject {
 			return this.oracle
 		}
 		this.methods['oracle:'] = (parameters, context) => {
-			this.oracle = parameters[0]
+			this.oracle = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context)
 			return this
 		}
 	}
 
 	respondTo(selector, parameters, context) {
+		console.log(this.constructor.name, selector, parameters.toString())
 		if (this.oracle === this) {
-			let self = context.respondTo('at:', [new MeatString(new MeatOracle(), 'self')], context)
+			let self = context.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatString(new MeatOracle(), 'self')
+			]), context)
 			return this.methods[selector].apply(self, [parameters, context])
 		}
 		return super.respondTo(selector, parameters, context)
+	}
+
+	toString() {
+		return '@Oracle'
 	}
 
 }
@@ -74,7 +89,9 @@ class MeatContext extends MeatObject {
 			return context
 		}
 		this.oracle.methods['at:'] = (parameters, context) => {
-			let name = parameters[0].string
+			let name = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context).string
 			let c = this
 			while (c && !c.variables[name]) {
 				c = c.parent
@@ -87,8 +104,12 @@ class MeatContext extends MeatObject {
 			return object
 		}
 		this.oracle.methods['at:put:'] = (parameters, context) => {
-			let name = parameters[0].string
-			let object = parameters[1]
+			let name = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context).string
+			let object = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 2)
+			]), context)
 			if (!this.isolated) {
 				let c = this
 				while (c && !c.variables[name]) {
@@ -105,10 +126,16 @@ class MeatContext extends MeatObject {
 	}
 
 	respondTo(selector, parameters, context) {
-		if (selector == 'at:' && parameters[0].string == 'self') {
+		console.log(this.constructor.name, selector, parameters.toString())
+		// FIXME can we get rid of this?
+		if (selector == 'at:' && parameters.items[0].string == 'self') {
 			return this.variables['self']
 		}
 		return super.respondTo(selector, parameters, context)
+	}
+
+	toString() {
+		return '@Context'
 	}
 
 }
@@ -120,22 +147,31 @@ class MeatBlock extends MeatObject {
 		this.parameters = parameters
 		this.f = (parameters, context) => {
 			this.parameters.forEach((parameter, i) => {
-				context.respondTo('at:put:', [new MeatString(new MeatOracle(), parameter), parameters[i]], context)
+				context.respondTo('at:put:', new MeatList(new MeatOracle(), [
+					new MeatString(new MeatOracle(), parameter),
+					parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+						new MeatNumber(new MeatOracle(), i + 1)
+					]), context)
+				]), context)
 			})
 			return f.apply(this, [parameters, context])
 		}
 		this.oracle.methods['evaluateIn:'] = (parameters, context) => {
-			context = context.respondTo('newContextBelow', [], context)
+			context = context.respondTo('newContextBelow', new MeatList(new MeatOracle(), []), context)
 			return this.f.apply(this, [parameters, context])
 		}
 		this.oracle.methods['evaluate:'] = (parameters, context) => {
-			context = context.respondTo('newIsolatedContextBelow', [], context)
+			context = context.respondTo('newIsolatedContextBelow', new MeatList(new MeatOracle(), []), context)
 			return this.f.apply(this, [parameters, context])
 		}
 		this.oracle.methods['evaluate'] = (parameters, context) => {
-			context = context.respondTo('newIsolatedContextBelow', [], context)
+			context = context.respondTo('newIsolatedContextBelow', new MeatList(new MeatOracle(), []), context)
 			return this.f.apply(this, [parameters, context])
 		}
+	}
+
+	toString() {
+		return '@Block'
 	}
 
 }
@@ -145,6 +181,10 @@ class MeatString extends MeatObject {
 	constructor(oracle, string) {
 		super(oracle)
 		this.string = string
+	}
+
+	toString() {
+		return `'${this.string.toString()}'`
 	}
 
 }
@@ -159,17 +199,27 @@ class MeatNumber extends MeatObject {
 		super(oracle)
 		this.number = number
 		this.oracle.methods['+'] = (parameters, context) => {
-			let summand = parameters[0].number
+			let summand = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context).number
 			return new MeatNumber(new MeatOracle(), this.number + summand)
 		}
 		this.oracle.methods['-'] = (parameters, context) => {
-			let minuend = parameters[0].number
+			let minuend = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context).number
 			return new MeatNumber(new MeatOracle(), this.number - minuend)
 		}
 		this.oracle.methods['<='] = (parameters, context) => {
-			let comparand = parameters[0].number
+			let comparand = parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+				new MeatNumber(new MeatOracle(), 1)
+			]), context).number
 			return new MeatBoolean(new MeatOracle(), this.number <= comparand)
 		}
+	}
+
+	toString() {
+		return this.number.toString()
 	}
 
 }
@@ -181,11 +231,23 @@ class MeatBoolean extends MeatObject {
 		this.boolean = boolean
 		this.oracle.methods['ifTrue:ifFalse:'] = (parameters, context) => {
 			if (this.boolean) {
-				return parameters[0].respondTo('evaluateIn:', [context], context)
+				return parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+					new MeatNumber(new MeatOracle(), 1)
+				]), context).respondTo('evaluateIn:', new MeatList(new MeatOracle(), [
+					context
+				]), context)
 			} else {
-				return parameters[1].respondTo('evaluateIn:', [context], context)
+				return parameters.respondTo('at:', new MeatList(new MeatOracle(), [
+					new MeatNumber(new MeatOracle(), 2)
+				]), context).respondTo('evaluateIn:', new MeatList(new MeatOracle(), [
+					context
+				]), context)
 			}
 		}
+	}
+
+	toString() {
+		return this.boolean.toString()
 	}
 
 }
@@ -196,16 +258,20 @@ class MeatList extends MeatObject {
 		super(oracle)
 		this.items = items
 		this.oracle.methods['at:'] = (parameters, context) => {
-			let index = parameters[0].number
+			let index = parameters.items[0].number - 1
 			let object = this.items[index] || new MeatObject(new MeatOracle())
 			this.items[index] = object
 			return object
 		}
 		this.oracle.methods['at:put:'] = (parameters, context) => {
-			let index = parameters[0].number
-			this.items[index] = parameters[1]
+			let index = parameters.items[0].number - 1
+			this.items[index] = parameters.items[1]
 			return this
 		}
+	}
+
+	toString() {
+		return `[${this.items.toString()}]`
 	}
 
 }
