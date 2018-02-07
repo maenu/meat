@@ -170,7 +170,7 @@ list
         {
             checkIndentation(actualIndentations.length);
             return statements;
-        })? ']'
+        })? '}'
 		{
 		    if (statements) {
 			    return new node.List(statements);

@@ -16,14 +16,20 @@ describe.only('compiler', () => {
 		let s = `"
 	This is a fibonacci program.
 "
-f := [ i
+f object: [ i
 	(i <= 1) ifTrue: [
 		1
 	] ifFalse: [
-		(f evaluate: (i - 2)) + (f evaluate: (i - 1))
+		(f evaluateWith: {
+			i - 2
+		} in: (context newIsolatedContextBelow)) + (f evaluateWith: {
+			i - 1
+		} in: (context newIsolatedContextBelow))
 	]
 ]
-f evaluate: ${n}
+f evaluateWith: {
+	${n}
+} in: context
 `
 		let text = c.compile(p.parse(s))
 		return eval(`const model = require('../../main/nodejs/vm/model');(${text})()`).number
@@ -52,7 +58,7 @@ f evaluate: ${n}
 	it('should compile fibonacci', function () {
 		this.timeout(30000)
 		let before = new Date()
-		assert.equal(javaScriptFibonacci(20), 10946)
+		assert.equal(javaScriptFibonacci(18), 4181)
 		let after = new Date()
 		console.log(`took ${after.getTime() - before.getTime()}ms`)
 	})
@@ -60,7 +66,7 @@ f evaluate: ${n}
 	it('should compile fibonacci', function () {
 		this.timeout(30000)
 		let before = new Date()
-		assert.equal(meatFibonacci(20), 10946)
+		assert.equal(meatFibonacci(18), 4181)
 		let after = new Date()
 		console.log(`took ${after.getTime() - before.getTime()}ms`)
 	})
