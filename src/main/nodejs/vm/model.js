@@ -1,3 +1,11 @@
+let isDebugMode = false
+
+console.debug = (...args) => {
+	if(isDebugMode) {
+		console.log.apply(console, args)
+	}
+}
+
 class MeatObject {
 
 	oracle() {
@@ -21,6 +29,10 @@ class MeatObject {
 			console.debug('!', 'MeatObject', this.constructor.name, this.toString(), selector, parameters.toString())
 			throw exception
 		}
+	}
+
+	value() {
+		return this
 	}
 
 	toString() {
@@ -56,10 +68,16 @@ class MeatBlock extends MeatObject {
 				return this
 			},
 			'oracle:': (parameters, context) => {
-				this._oracle = parameters.respondTo('at:', new MeatList([
+				this.self._oracle = parameters.respondTo('at:', new MeatList([
 					new MeatNumber(1)
 				]), context)
 				return this.self
+			},
+			'=': (parameters, context) => {
+				let other = parameters.respondTo('at:', new MeatList([
+					new MeatNumber(1)
+				]), context)
+				return new MeatBoolean(this.self.value() == other.value())
 			}
 		}
 	}
@@ -150,6 +168,10 @@ class MeatString extends MeatObject {
 		this.string = string
 	}
 
+	value() {
+		return this.string
+	}
+
 	toString() {
 		return `'${this.string}'`
 	}
@@ -171,6 +193,10 @@ class MeatNumber extends MeatObject {
 		return new MeatNumberOracle(this)
 	}
 
+	value() {
+		return this.number
+	}
+
 	toString() {
 		return this.number.toString()
 	}
@@ -186,6 +212,10 @@ class MeatBoolean extends MeatObject {
 
 	newOracle() {
 		return new MeatBooleanOracle(this)
+	}
+
+	value() {
+		return this.boolean
 	}
 
 	toString() {

@@ -5,7 +5,7 @@ class Compiler {
 	compile(ast) {
 		this.source = ''
 		let visitor = new Visitor(this)
-		this.append('function () {\n')
+		this.append('() => {\n')
 		this.append('let context = new model.MeatContext(null, false);\n')
 		ast.accept(visitor)
 		this.append('}\n')
@@ -89,7 +89,7 @@ class Visitor extends visitor.DepthFirst {
 		this.append(node.parameters.map((parameter) => {
 			return `'${parameter}'`
 		}).join(', '))
-		this.append('], function (parameters, context) {\n')
+		this.append('], (parameters, context) => {\n')
 		super.visitBlock(node)
 		this.append('\n})')
 	}
