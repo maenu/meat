@@ -1,11 +1,3 @@
-let isDebugMode = false
-
-console.debug = (...args) => {
-	if(isDebugMode) {
-		console.log.apply(console, args)
-	}
-}
-
 class MeatObject {
 
 	oracle() {
@@ -20,15 +12,7 @@ class MeatObject {
 	}
 
 	respondTo(selector, parameters, context) {
-		console.debug('>', 'MeatObject', this.constructor.name, this.toString(), selector, parameters.toString())
-		try {
-			let result = this.oracle().respondTo('evaluateWith:in:', new MeatList([new MeatList([new MeatString(selector), parameters]), context]), context)
-			console.debug('<', 'MeatObject', this.constructor.name, this.toString(), selector, parameters.toString(), result.toString())
-			return result
-		} catch (exception) {
-			console.debug('!', 'MeatObject', this.constructor.name, this.toString(), selector, parameters.toString())
-			throw exception
-		}
+		return this.oracle().respondTo('evaluateWith:in:', new MeatList([new MeatList([new MeatString(selector), parameters]), context]), context)
 	}
 
 	value() {
@@ -86,15 +70,7 @@ class MeatBlock extends MeatObject {
 		if (this._oracle) {
 			return super.respondTo(selector, parameters, context)
 		}
-		console.debug('>', 'MeatBlock', this.constructor.name, this.toString(), selector, parameters.toString())
-		try {
-			let result = this.methods[selector].apply(this, [parameters, context])
-			console.debug('<', 'MeatBlock', this.constructor.name, this.toString(), selector, parameters.toString(), result.toString())
-			return result
-		} catch (exception) {
-			console.debug('!', 'MeatBlock', this.constructor.name, this.toString(), selector, parameters.toString(), Object.keys(this.methods), this)
-			throw exception
-		}
+		return this.methods[selector].apply(this, [parameters, context])
 	}
 
 	toString() {
@@ -140,15 +116,11 @@ class MeatVariable extends MeatObject {
 			return super.respondTo(selector, parameters, context)
 		}
 		// TODO get object from self
-		console.debug('>', 'MeatVariable', this.constructor.name, this.toString(), selector, parameters.toString())
-		try {
-			let result = this.object.respondTo(selector, parameters, context)
-			console.debug('<', 'MeatVariable', this.constructor.name, this.toString(), selector, parameters.toString(), result.toString())
-			return result
-		} catch (exception) {
-			console.debug('!', 'MeatVariable', this.constructor.name, this.toString(), selector, parameters.toString())
-			throw exception
-		}
+		return this.object.respondTo(selector, parameters, context)
+	}
+
+	value() {
+		return this.object.value()
 	}
 
 	newOracle() {

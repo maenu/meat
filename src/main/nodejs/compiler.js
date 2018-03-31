@@ -5,11 +5,9 @@ class Compiler {
 	compile(ast) {
 		this.source = ''
 		let visitor = new Visitor(this)
-		this.append('() => {\n')
 		this.append('let context = new model.MeatContext(null, false);\n')
 		ast.accept(visitor)
-		this.append('}\n')
-		return this.source
+		return new Function('model', this.source)
 	}
 
 	append(string) {

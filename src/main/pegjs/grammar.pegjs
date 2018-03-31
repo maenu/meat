@@ -9,19 +9,19 @@
 }
 
 goal
-    = statements
+	= statements
 
 indent
 	= ''
-        {
-            expectedIndentation = expectedIndentation + 1;
-        }
+		{
+			expectedIndentation = expectedIndentation + 1;
+		}
 
 dedent
 	= ''
-        {
-            expectedIndentation = expectedIndentation - 1;
-        }
+		{
+			expectedIndentation = expectedIndentation - 1;
+		}
 
 statements
 	= statements:

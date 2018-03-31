@@ -1,22 +1,16 @@
 const assert = require('assert')
 const parser = require('../../main/nodejs/parser')
 const compiler = require('../../main/nodejs/compiler')
+const model = require('../../main/nodejs/vm/model')
+
+let parser_ = new parser.Parser()
+let compiler_ = new compiler.Compiler()
+let meatCompile = (source) => {
+	let f = compiler_.compile(parser_.parse(source))
+	return () => f(model)
+}
 
 describe.only('compiler', () => {
-
-	let p
-	let c
-	let i
-
-	before(() => {
-		p = new parser.Parser()
-		c = new compiler.Compiler()
-		i = (s) => {
-			let text = c.compile(p.parse(s))
-			console.debug(text)
-			return eval(`const model = require('../../main/nodejs/vm/model');(${text})()`)
-		}
-	})
 
 	describe('oracle', ()=>{
 
@@ -31,7 +25,7 @@ o hello
 			console.log(s)
 			console.log('<<<')
 			console.log(e)
-			assert.equal(i(s).string, e)
+			assert.equal(meatCompile(s)().string, e)
 		})
 
 		it('should be polite', () => {
@@ -49,7 +43,7 @@ o hello
 			console.log(s)
 			console.log('<<<')
 			console.log(e)
-			assert.equal(i(s).string, e)
+			assert.equal(meatCompile(s)().string, e)
 		})
 
 	})
@@ -75,43 +69,47 @@ f evaluateWith: {
 	${n}
 } in: context
 `
-			return i(s).number
+			return meatCompile(s)
 		}
-		let javaScriptFibonacci = (n) => {
+		
+		let jsFibonacci = (n) => {
 			if (n <= 1) {
 				return 1
 			}
-			return javaScriptFibonacci(n - 2) + javaScriptFibonacci(n - 1)
+			return jsFibonacci(n - 2) + jsFibonacci(n - 1)
 		}
 
 		it('should compile fibonacci', () => {
-			assert.equal(meatFibonacci(0), 1)
-			assert.equal(meatFibonacci(1), 1)
-			assert.equal(meatFibonacci(2), 2)
-			assert.equal(meatFibonacci(3), 3)
-			assert.equal(meatFibonacci(4), 5)
-			assert.equal(meatFibonacci(5), 8)
-			assert.equal(meatFibonacci(6), 13)
-			assert.equal(meatFibonacci(7), 21)
-			assert.equal(meatFibonacci(8), 34)
-			assert.equal(meatFibonacci(9), 55)
-			assert.equal(meatFibonacci(10), 89)
+			assert.equal(meatFibonacci(0)().number, 1)
+			assert.equal(meatFibonacci(1)().number, 1)
+			assert.equal(meatFibonacci(2)().number, 2)
+			assert.equal(meatFibonacci(3)().number, 3)
+			assert.equal(meatFibonacci(4)().number, 5)
+			assert.equal(meatFibonacci(5)().number, 8)
+			assert.equal(meatFibonacci(6)().number, 13)
+			assert.equal(meatFibonacci(7)().number, 21)
+			assert.equal(meatFibonacci(8)().number, 34)
+			assert.equal(meatFibonacci(9)().number, 55)
+			assert.equal(meatFibonacci(10)().number, 89)
 		})
 
 		it('should compile fibonacci', function () {
-			this.timeout(30000)
-			let before = new Date()
-			assert.equal(javaScriptFibonacci(18), 4181)
-			let after = new Date()
-			console.log(`took ${after.getTime() - before.getTime()}ms`)
-		})
-
-		it('should compile fibonacci', function () {
-			this.timeout(30000)
-			let before = new Date()
-			assert.equal(meatFibonacci(18), 4181)
-			let after = new Date()
-			console.log(`took ${after.getTime() - before.getTime()}ms`)
+			this.timeout(600000)
+			let meatFibonacci25 = meatFibonacci(25)
+			for (let i = 0; i < 10; i = i + 1) {
+				let before = new Date()
+				let result = meatFibonacci25().number
+				let after = new Date()
+				console.log(`meat-js,fibonacci(25),${i},${after.getTime() - before.getTime()},${result}`)
+				assert.equal(result, 121393)
+			}
+			for (let i = 0; i < 10; i = i + 1) {
+				let before = new Date()
+				let result = jsFibonacci(25)
+				let after = new Date()
+				console.log(`js,fibonacci(25),${i},${after.getTime() - before.getTime()},${result}`)
+				assert.equal(result, 121393)
+			}
 		})
 
 	})
